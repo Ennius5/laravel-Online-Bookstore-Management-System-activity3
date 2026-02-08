@@ -1,0 +1,107 @@
+Migrations = Blueprint for your database tables (structure)
+
+Seeders = Filling those tables with initial data (content)
+
+Factories = Template for creating fake data (used by seeders)
+
+Factories are for making fake data only apparently.
+
+Factories = "Let's make up some fake users to test with"
+
+Seeders = "We need these specific users/roles/settings for the app to work"
+THat's data generation. Do I use seeders to create data derived from user input?
+No, absolutely NOT! Seeders are NOT for user-generated data.
+Use controllers for that
+
+Seeders = Initial/static data (run once during setup)
+
+Controllers/Jobs = Dynamic/user data (run continuously)
+
+Think of it this way: Seeders are like setting up a new phone with default contacts
+(Mom, Dad, Emergency). User data is like adding your actual friends' contacts as you
+meet people. You don't use the "restore defaults" feature to add new friends!
+
+How HasFactory works
+
+
+// Model: App\Models\Category
+// Laravel automatically looks for: Database\Factories\CategoryFactory
+// Rules:
+// 1. Takes model namespace: App\Models\Category
+// 2. Replaces "App\Models\" with "Database\Factories\"
+// 3. Appends "Factory" to the class name
+// Result: Database\Factories\CategoryFactory
+
+This is convention over configuration + dependency resolution, not polymorphism
+It's More Like a "Registry" or "Locator" Pattern
+// When you call: Category::factory()
+// Laravel does:
+
+// Step 1: Get the model class name
+$modelClassName = 'App\Models\Category';
+
+// Step 2: Convert to factory class name (string manipulation)
+$factoryClassName = 'Database\Factories\CategoryFactory';
+
+// Step 3: Check if class exists
+if (class_exists($factoryClassName)) {
+    // Step 4: Instantiate it (not polymorphic - just new Class())
+    return new $factoryClassName();
+}
+
+
+I'm not seeing any create() methods in the models nor the factories.
+What's going on here?
+
+// This returns a Factory INSTANCE, not the model!
+$factoryInstance = Category::factory(5);
+// $factoryInstance is an instance of CategoryFactory
+
+// Illuminate\Database\Eloquent\Factories\Factory.php
+abstract class Factory
+{
+    // This is where create() is defined!
+    public function create($attributes = [], ?Model $parent = null)
+    {
+        // Creates and saves to database
+        $model = $this->make($attributes, $parent);
+
+        if ($this->connection) {
+            $model->setConnection($this->connection);
+        }
+
+        $model->save();
+
+        $this->store($model);
+
+        return $model;
+    }
+
+    // And there are other methods too:
+    public function make($attributes = [], ?Model $parent = null) { }
+    public function raw($attributes = [], ?Model $parent = null) { }
+    public function count($count) { }
+    // ... etc
+}
+
+
+
+Category::factory(5)->create();
+         │            │
+         │            └─ Method from Factory base class
+         │
+         └─ Returns CategoryFactory instance
+            (which extends Factory class)
+
+
+// All these come from the base Factory class:
+$factory = Category::factory();
+
+$factory->create();      // Creates and saves to DB
+$factory->make();        // Creates instance without saving
+$factory->raw();         // Returns raw array data
+$factory->count(5);      // Set how many to create
+$factory->state(['name' => 'Special']); // Override attributes
+$factory->sequence(...); // Create sequence of values
+$factory->afterMaking(); // Callback after making
+$factory->afterCreating(); // Callback after creating
