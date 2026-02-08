@@ -105,3 +105,22 @@ $factory->state(['name' => 'Special']); // Override attributes
 $factory->sequence(...); // Create sequence of values
 $factory->afterMaking(); // Callback after making
 $factory->afterCreating(); // Callback after creating
+
+
+MIGRATING: IT only works if the empty database already exists.
+
+Sometimes config cache needs to be cleared in order for the thing to connect to the right DB
+
+# Clear ALL caches
+php artisan config:clear
+php artisan cache:clear
+php artisan view:clear
+
+# Sometimes config:cache causes issues
+php artisan config:cache  # Create fresh cache
+php artisan config:clear  # Then clear it again
+
+# Now check
+php artisan tinker
+>>> echo DB::connection()->getDatabaseName();
+// Should now say: pageturner_bookstore
