@@ -13,7 +13,13 @@ return new class extends Migration
     {
         Schema::create('reviews', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('book_id')->constrained()->onDelete('cascade');
+            $table->tinyInteger('rating')->unsigned(); //Must be limited to 1-5 stars.
+            $table->text('comment')->nullable();
             $table->timestamps();
+
+            $table->unique(['user_id', 'book_id']);// Ensure a user can only review a book once.
         });
     }
 

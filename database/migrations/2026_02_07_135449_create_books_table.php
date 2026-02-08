@@ -13,6 +13,14 @@ return new class extends Migration
     {
         Schema::create('books', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('category_id')->constrained()->onDelete('cascade'); // Why is this returning a too many arguments error? --- IGNORE ---
+            $table->string('title');
+            $table->string('author');
+            $table->string('isbn')->unique();
+            $table->decimal('price', 10, 2);
+            $table->integer('stock_quantity')->default(0);
+            $table->text('description')->nullable();
+            $table->string('cover_image')->nullable();
             $table->timestamps();
         });
     }
