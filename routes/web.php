@@ -61,4 +61,35 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::delete('/books/{book}', [BookController::class, 'destroy'])->name('books.destroy');
 });
 
+
+
+//Make this a habit
+// debugging vite because styles are not applying
+Route::get('/debug-vite', function() {
+    echo "<h1>Vite Debug</h1>";
+
+    // What does @vite generate?
+    echo "<h2>Vite Output:</h2>";
+    echo htmlspecialchars(
+        app(Illuminate\Foundation\Vite::class)(['resources/css/app.css', 'resources/js/app.js'])->toHtml()
+    );
+
+    // Check manifest
+    echo "<h2>Manifest Contents:</h2>";
+    $manifestPath = public_path('build/manifest.json');
+    if (file_exists($manifestPath)) {
+        $manifest = json_decode(file_get_contents($manifestPath), true);
+        echo "<pre>" . json_encode($manifest, JSON_PRETTY_PRINT) . "</pre>";
+    } else {
+        echo "Manifest not found at: " . $manifestPath;
+    }
+
+    // Check generated files
+    echo "<h2>Generated Files:</h2>";
+    $files = glob(public_path('build/assets/*'));
+    foreach ($files as $file) {
+        echo basename($file) . " (" . round(filesize($file)/1024, 2) . " KB)<br>";
+    }
+});
+
 require __DIR__.'/auth.php';

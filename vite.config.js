@@ -11,8 +11,8 @@ export default defineConfig({
         tailwindcss(),
     ],
         build: {
+        // manifest: true, THIS CAUSES THE .VITE SUBFOLDER ISSUE
         outDir: 'public/build',
-        manifest: true,
         rollupOptions: {
             // Explicit input configuration
             input: {
