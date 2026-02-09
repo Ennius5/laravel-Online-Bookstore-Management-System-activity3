@@ -211,3 +211,11 @@ Normally, you'd add this in your vite.config.js
             ignored: ['**/storage/framework/views/**'],
         },
     },
+
+
+DEBUG PURPOSES:
+    composer require fruitcake/laravel-debugbar --dev
+
+
+if using uploaded images, don't forget to link the storage!
+php artisan link:storage

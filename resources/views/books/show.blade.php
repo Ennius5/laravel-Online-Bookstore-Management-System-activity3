@@ -105,11 +105,32 @@
                         </div>
                     </div>
 
+
+
+
+                    <!-- Button to order -->
                     @if($book->stock_quantity > 0)
-                        <form action="{{ route('orders.store', $book) }}" method="POST" class="flex items-center gap-2">
+                        <!-- <form action="{{ route('orders.store', $book) }}" method="POST" class="flex items-center gap-2">
                             @csrf
                             <input type="number" name="quantity" value="1" min="1" max="{{ $book->stock_quantity }}"
                                    class="w-20 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition font-medium">
+                                Add to Cart
+                            </button>
+                        </form> -->
+                        <!-- FORM FIX -->
+                         <form action="{{ route('orders.store', $book) }}" method="POST" class="flex items-center gap-2">
+                        @csrf
+                            <!-- Hidden field to pass book_id in the order_items array structure -->
+                            <input type="hidden" name="order_items[0][book_id]" value="{{ $book->id }}">
+
+                            <input type="number"
+                                name="order_items[0][quantity]"
+                                value="1"
+                                min="1"
+                                max="{{ $book->stock_quantity }}"
+                                class="w-20 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+
                             <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition font-medium">
                                 Add to Cart
                             </button>
@@ -147,7 +168,7 @@
                 @auth
                     @if(auth()->user()->isAdmin())
                         <div class="mt-8 pt-6 border-t border-gray-200 flex space-x-4">
-                            <a href="{{ route('books.edit', $book) }}"
+                            <a href="{{ route('admin.books.edit', $book) }}"
                                class="inline-flex items-center bg-yellow-500 text-white px-5 py-2.5 rounded-lg hover:bg-yellow-600 transition font-medium">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -155,7 +176,7 @@
                                 </svg>
                                 Edit Book
                             </a>
-                            <form action="{{ route('books.destroy', $book) }}" method="POST"
+                            <form action="{{ route('admin.books.destroy', $book) }}" method="POST"
                                   onsubmit="return confirm('Are you sure you want to delete this book?')">
                                 @csrf
                                 @method('DELETE')

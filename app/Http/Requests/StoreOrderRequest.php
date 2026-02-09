@@ -4,16 +4,19 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Models\Book;
+use Log;
 
 class StoreOrderRequest extends FormRequest
 {
     public function authorize(): bool
     {
+        Log::info('Authorizing order request for user ID: ' . auth()->id());
         return auth()->check(); // false positive from intelephense.
     }
 
     public function rules(): array
 {
+    Log::info('(rules function)Validating order request for user ID: ' . auth()->id(), ['request' => $this->all()]);
     return [
         'order_items' => 'required|array|min:1',
         'order_items.*.book_id' => [
@@ -23,6 +26,7 @@ class StoreOrderRequest extends FormRequest
                 $index = explode('.', $attribute)[1];
                 $quantity = request()->input("order_items.{$index}.quantity", 1);
                 $book = Book::find($value);
+                Log::info("Validating book ID: {$value} with quantity: {$quantity}");
 
                 if (!$book || $book->stock_quantity < $quantity) {
                     $fail("Insufficient stock for selected book.");

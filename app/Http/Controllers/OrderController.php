@@ -9,7 +9,7 @@ use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
+use Log;
 class OrderController extends Controller
 {
     /**
@@ -73,10 +73,12 @@ class OrderController extends Controller
      */
     public function store(StoreOrderRequest $request)
     {
+        Log::info('Storing new order for user ID: ' . auth()->id(), ['request' => $request->all()]);
         DB::beginTransaction();
-
         try {
+            Log::info('Storing new order for user ID: ' . auth()->id(), ['request' => $request->all()]);
             // Validate cart items
+            Log::info('What is in the request?:', ['request' => $request->all()]);
             $cartItems = $request->input('order_items', []); // was cart
 
             if (empty($cartItems)) {
@@ -127,6 +129,7 @@ class OrderController extends Controller
                 ->with('success', 'Order placed successfully!');
 
         } catch (\Exception $e) {
+            Log::info('Failed to place order for user ID: ' . auth()->id(), ['error' => $e->getMessage()]);
             DB::rollBack();
             return back()->withInput()->with('error', $e->getMessage());
         }
