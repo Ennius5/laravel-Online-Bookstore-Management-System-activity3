@@ -209,7 +209,7 @@
                     <div class="mb-4">
                         <label class="block text-gray-700 mb-2 font-medium">Rating</label>
                         <div class="flex items-center space-x-1" id="rating-stars">
-                            @for($i = 5; $i >= 1; $i--)
+                            @for($i = 1; $i <= 5; $i++)
                                 <button type="button"
                                         data-rating="{{ $i }}"
                                         class="rating-star text-3xl {{ $userReview && $userReview->rating >= $i ? 'text-yellow-400' : 'text-gray-300' }} hover:text-yellow-400 transition">

@@ -77,7 +77,7 @@ class OrderController extends Controller
 
         try {
             // Validate cart items
-            $cartItems = $request->input('cart', []);
+            $cartItems = $request->input('order_items', []); // was cart
 
             if (empty($cartItems)) {
                 return back()->with('error', 'Your cart is empty.');

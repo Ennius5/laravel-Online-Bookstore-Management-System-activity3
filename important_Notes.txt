@@ -180,3 +180,34 @@ Troubleshooting
 Browser Cache: If styles do not appear, perform a hard refresh (Ctrl+Shift+R or Cmd+Shift+R).
 Vite Issues: If using Vite, ensure you are using the new @tailwindcss/vite plugin instead of the old PostCSS plugin approach for better performance.
 Version Conflict: If you are forced to use Tailwind v3, use npm install -D tailwindcss@3 postcss autoprefixer.
+
+
+Just reinstall tailwind if all else fails.
+
+
+
+
+Normally, you'd add this in your vite.config.js
+
+        build: {
+        // manifest: true, THIS CAUSES THE .VITE SUBFOLDER ISSUE
+        outDir: 'public/build',
+        rollupOptions: {
+            // Explicit input configuration
+            input: {
+                app: 'resources/css/app.css',
+                js: 'resources/js/app.js'
+            }
+        }
+    },
+    // Resolve aliases if needed
+    resolve: {
+        alias: {
+            '@': '/resources/js',
+        },
+    },
+    server: {
+        watch: {
+            ignored: ['**/storage/framework/views/**'],
+        },
+    },
