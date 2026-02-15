@@ -20,8 +20,7 @@ gray-400 hover:text-white">Home</a></li>
 
 <li><a href="{{ route('books.index') }}"
 class="text-gray-400 hover:text-white">Browse Books</a></li>
-<li><a href="{{ route('categories.index') }}"
-class="text-gray-400 hover:text-white">Categories</a></li>
+
 
 </ul>
 </div>

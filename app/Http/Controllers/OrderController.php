@@ -195,7 +195,8 @@ class OrderController extends Controller
         DB::beginTransaction();
 
         try {
-            // Handle status updates
+
+        // Handle status updates
             if ($request->has('status')) {
                 $newStatus = $request->status;
 
@@ -334,7 +335,7 @@ class OrderController extends Controller
         try {
             $oldStatus = $order->status;
             $newStatus = $request->status;
-
+            Log::info("Old status =>>> $oldStatus \n New Status =>>> $newStatus");
             // Handle stock adjustments for cancellations/uncancellations
             if ($oldStatus !== 'cancelled' && $newStatus === 'cancelled') {
                 // Restore stock
@@ -350,7 +351,7 @@ class OrderController extends Controller
                     $item->book->decrement('stock_quantity', $item->quantity);
                 }
             }
-
+            Log::info("Updating the order with status $newStatus");
             $order->update(['status' => $newStatus]);
 
             DB::commit();
@@ -360,7 +361,7 @@ class OrderController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', $e->getMessage());
+            return back()->with('error', "updateStatus() caught an error: {$e->getMessage()}");
         }
     }
 

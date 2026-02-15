@@ -38,6 +38,20 @@
     </div>
 
     {{-- Books Grid --}}
+@php
+    $catId = request('category');
+@endphp
+@if($catId)
+    @php
+        $selectedCategory = $categories->firstWhere('id', $catId);
+    @endphp
+    @if($selectedCategory)
+        <div class="text-m p-8 align-middle bg-amber-600 rounded-md">
+            <div class="text-2xl">{{ $selectedCategory->name }}</div>
+            {{ $selectedCategory->description }}
+        </div>
+    @endif
+@endif
     @if($books->count() > 0)
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             @foreach($books as $book)

@@ -22,12 +22,7 @@ class="hover:bg-indigo-700 px-3 py-2 rounded-md">
 
 Books
 </a>
-<a href="{{ route('categories.index') }}"
 
-class="hover:bg-indigo-700 px-3 py-2 rounded-md">
-
-Categories
-</a>
 @auth
 @if(auth()->user()->isAdmin())
 <a
@@ -39,10 +34,10 @@ Add Book
 </a>
 <a
 
-href="{{ route('admin.categories.create') }}" class="hover:bg-
+href="{{ route('admin.categories.index') }}" class="hover:bg-
 indigo-700 px-3 py-2 rounded-md">
 
-Add Category
+Categories Dashboard
 </a>
 @endif
 @endauth
@@ -71,7 +66,10 @@ class="hover:bg-indigo-700 px-3 py-2 rounded-md">
 
 My Orders
 </a>
-<span class="text-indigo-200">{{ auth()->user()->name }}</span>
+<a href="{{ route('dashboard') }}" class="hover:bg-
+indigo-700 px-3 py-2 rounded-md">
+<span class="text-indigo-200"> {{ auth()->user()->name }}</span>
+</a>
 
 <form method="POST" action="{{ route('logout') }}"
 

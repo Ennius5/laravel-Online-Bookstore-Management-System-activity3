@@ -155,4 +155,27 @@ public function update(Request $request, Book $book)
         return redirect()->route('books.index')
             ->with('success', 'Book deleted successfully.');
     }
+
+    public function getBooks($categoryId){
+                // Find the category with its books
+        $category = Category::with('books')->findOrFail($categoryId);
+
+        // Return just the books or full category data
+        return response()->json([
+            'category' => [
+                'id' => $category->id,
+                'name' => $category->name,
+            ],
+            'books' => $category->books->map(function($book) {
+                return [
+                    'id' => $book->id,
+                    'title' => $book->title,
+                    'author' => $book->author,
+                    'isbn' => $book->isbn,
+                    'description' => $book->description,
+                    'cover_image' => $book->cover_image,
+                ];
+            })
+        ]);
+    }
 }

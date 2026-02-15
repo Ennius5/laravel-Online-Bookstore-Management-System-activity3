@@ -31,9 +31,11 @@
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 @foreach($categories as $category)
                     <a
-                        href="{{ route('categories.show', $category) }}"
+                        href="{{ route('books.index', ['category' => $category->id]) }}"
+                        name="category"
                         class="group bg-white p-4 rounded-lg shadow hover:shadow-md transition text-center border border-gray-100 hover:border-indigo-200"
-                    >
+
+                        >
                         <h3 class="font-semibold text-gray-800 group-hover:text-indigo-700">{{ $category->name }}</h3>
                         <p class="text-sm text-gray-500 mt-1">{{ $category->books_count }} books</p>
                     </a>

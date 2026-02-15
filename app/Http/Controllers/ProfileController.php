@@ -8,7 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
-
+use App\Models\Order;
+use App\Models\Review;
 class ProfileController extends Controller
 {
     /**
@@ -57,4 +58,24 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
+public function dashboard(Request $request): View
+{
+    $user = $request->user();
+
+    // Eager load order items with their books
+    $recentOrders = Order::where('user_id', $user->id)
+                        ->with(['orderItems.book'])
+                        ->latest()
+                        ->limit(5)
+                        ->get();
+
+    $recentReviews = Review::where('user_id', $user->id)
+                          ->with('book')
+                          ->latest()
+                          ->limit(5)
+                          ->get();
+
+    return view('dashboard', compact('user', 'recentOrders', 'recentReviews'));
+}
 }

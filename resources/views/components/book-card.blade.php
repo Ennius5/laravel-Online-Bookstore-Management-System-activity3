@@ -1,6 +1,6 @@
 @props(['book'])
 
-<div {{ $attributes->merge(['class' => 'bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300']) }}>
+<div {{ $attributes->merge(['class' => 'bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 transition-transform hover:scale-105']) }}>
     {{-- Cover Image --}}
     <div class="h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
         @if($book->cover_image)
