@@ -108,20 +108,20 @@
 
 
 
-                    <!-- Button to order -->
+                    {{--Button to order--}}
                     @if($book->stock_quantity > 0)
-                        <!-- <form action="{{ route('orders.store', $book) }}" method="POST" class="flex items-center gap-2">
+                        {{-- <form action="{{ route('orders.store', $book) }}" method="POST" class="flex items-center gap-2">
                             @csrf
                             <input type="number" name="quantity" value="1" min="1" max="{{ $book->stock_quantity }}"
                                    class="w-20 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                             <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition font-medium">
                                 Add to Cart
                             </button>
-                        </form> -->
-                        <!-- FORM FIX -->
+                        </form> --}}
+                        {{--FORM FIX -->  --}}
                          <form action="{{ route('orders.store', $book) }}" method="POST" class="flex items-center gap-2">
                         @csrf
-                            <!-- Hidden field to pass book_id in the order_items array structure -->
+                            {{-- Hidden field to pass book_id in the order_items array structure --}}
                             <input type="hidden" name="order_items[0][book_id]" value="{{ $book->id }}">
 
                             <input type="number"
@@ -322,6 +322,7 @@
             </div>
         @endif
     </div>
+
 
     {{-- JavaScript for Star Rating --}}
     @push('scripts')

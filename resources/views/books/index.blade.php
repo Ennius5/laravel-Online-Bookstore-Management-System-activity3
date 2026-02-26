@@ -8,10 +8,10 @@
         <form action="{{ route('books.index') }}" method="GET" class="flex flex-wrap gap-4">
             <div class="flex-1 min-w-[200px]">
                 <input
-                    type="text"
-                    name="search"
-                    value="{{ request('search') }}"
-                    placeholder="Search by title or author..."
+                type="text"
+                name="search"
+                value="{{ request('search') }}"
+                placeholder="Search by title or author..."
                     class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                 >
             </div>
@@ -35,6 +35,7 @@
                 Search
             </button>
         </form>
+
     </div>
 
     {{-- Books Grid --}}
@@ -56,7 +57,8 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             @foreach($books as $book)
                 <x-book-card :book="$book" />
-            @endforeach
+                @endforeach
+
         </div>
 
         {{-- Pagination --}}

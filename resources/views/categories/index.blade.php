@@ -56,13 +56,15 @@
                     </span>
                 </button>
 
+                {{--There was a bug her in generating the buttons here. addslashes() method from php fixed it.It's because a character broke le javascript syntax--}}
                 @auth
                     @if(auth()->user()->role === 'admin')
                         <div class="absolute top-0 right-0 mt-2 mr-2 hidden group-hover:flex space-x-1">
-                            <button onclick="openEditModal({{ $category->id }}, '{{ $category->name }}', '{{ $category->description }}')"
-                                    class="bg-blue-500 text-white p-1 rounded hover:bg-blue-600 text-xs">
+                            <button onclick="openEditModal({{ $category->id }}, '{{ addslashes($category->name) }}', '{{ addslashes($category->description) }}')"
+                                    class="bg-green-500 text-white p-1 rounded hover:bg-blue-600 text-xs">
                                 Edit
                             </button>
+
                             <button onclick="deleteCategory({{ $category->id }})"
                                     class="bg-red-500 text-white p-1 rounded hover:bg-red-600 text-xs">
                                 Delete
