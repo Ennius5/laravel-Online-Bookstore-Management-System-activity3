@@ -4,7 +4,7 @@
 
 @section('content')
     {{-- Hero Section --}}
-    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl p-8 mb-12">
+    <div class="bg-gradient-to-r from-amber-600 to-purple-600 text-white rounded-2xl p-8 mb-12 shadow-2xl/90 shadow-amber-500/50">
         <div class="max-w-3xl">
             <h1 class="text-4xl md:text-5xl font-bold mb-4">Welcome to PageTurner</h1>
             <p class="text-xl text-indigo-100 mb-8 leading-relaxed">
@@ -33,7 +33,7 @@
                     <a
                         href="{{ route('books.index', ['category' => $category->id]) }}"
                         name="category"
-                        class="group bg-white p-4 rounded-lg shadow hover:shadow-md transition text-center border border-gray-100 hover:border-indigo-200"
+                        class="group bg-white p-4 rounded-lg shadow-lg shadow-amber-500/50 hover:shadow-md transition text-center border border-gray-100 hover:border-indigo-200"
 
                         >
                         <h3 class="font-semibold text-gray-800 group-hover:text-indigo-700">{{ $category->name }}</h3>

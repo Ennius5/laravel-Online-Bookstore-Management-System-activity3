@@ -15,19 +15,37 @@
                     </p>
                 </div>
 
-                {{-- Order Status Badge --}}
-                @php
-                    $statusColors = [
-                        'pending' => 'bg-yellow-100 text-yellow-800',
-                        'processing' => 'bg-blue-100 text-blue-800',
-                        'shipped' => 'bg-indigo-100 text-indigo-800',
-                        'completed' => 'bg-green-100 text-green-800',
-                        'cancelled' => 'bg-red-100 text-red-800',
-                    ];
-                @endphp
-                <span class="px-3 py-1 rounded-full text-sm font-medium {{ $statusColors[$order->status] ?? 'bg-gray-100 text-gray-800' }}">
-                    {{ ucfirst($order->status) }}
-                </span>
+                <div class="flex items-center space-x-4">
+                    {{-- Order Status Badge --}}
+                    @php
+                        $statusColors = [
+                            'pending' => 'bg-yellow-100 text-yellow-800',
+                            'processing' => 'bg-blue-100 text-blue-800',
+                            'shipped' => 'bg-indigo-100 text-indigo-800',
+                            'completed' => 'bg-green-100 text-green-800',
+                            'cancelled' => 'bg-red-100 text-red-800',
+                        ];
+                    @endphp
+                    <span class="px-3 py-1 rounded-full text-sm font-medium {{ $statusColors[$order->status] ?? 'bg-gray-100 text-gray-800' }}">
+                        {{ ucfirst($order->status) }}
+                    </span>
+
+                    {{-- Process Order Button (only for pending orders) --}}
+                    @if($order->status === 'pending')
+                        <form action="{{ route('orders.process') }}" method="POST" class="inline">
+                            @csrf
+                            <input type="hidden" name="order_id" value="{{ $order->id }}">
+                            <button type="submit"
+                                    class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition font-medium flex items-center"
+                                    onclick="return confirm('Are you sure you want to process this order? This will update the inventory.')">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                Process Order
+                            </button>
+                        </form>
+                    @endif
+                </div>
             </div>
 
             {{-- Customer Info --}}
@@ -134,19 +152,25 @@
         </div>
 
         {{-- Order Actions --}}
-        @if($order->isCancellable())
         <div class="p-6 border-t border-gray-200 bg-gray-50">
-            <form action="{{ route('orders.cancel', $order) }}" method="POST"
-                  onsubmit="return confirm('Are you sure you want to cancel this order?')">
-                @csrf
-                @method('DELETE')
-                <button type="submit"
-                        class="px-4 py-2 border border-red-300 text-red-700 rounded-md hover:bg-red-50 transition">
-                    Cancel Order
-                </button>
-            </form>
+            <div class="flex justify-between items-center">
+                <div class="flex space-x-4">
+                    @if($order->isCancellable())
+                        <form action="{{ route('orders.cancel', $order) }}" method="POST"
+                              onsubmit="return confirm('Are you sure you want to cancel this order?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit"
+                                    class="px-4 py-2 border border-red-300 text-red-700 rounded-md hover:bg-red-50 transition">
+                                Cancel Order
+                            </button>
+                        </form>
+                    @endif
+                </div>
+
+
+            </div>
         </div>
-        @endif
 
         {{-- Admin Actions --}}
         @auth
@@ -169,6 +193,22 @@
                             Update Status
                         </button>
                     </form>
+
+                    {{-- Process Order Button (Admin) --}}
+                    @if($order->status === 'pending')
+                        <form action="{{ route('orders.process') }}" method="POST" class="inline">
+                            @csrf
+                            <input type="hidden" name="order_id" value="{{ $order->id }}">
+                            <button type="submit"
+                                    class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition flex items-center"
+                                    onclick="return confirm('Are you sure you want to process this order? This will update the inventory.')">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                Process Order
+                            </button>
+                        </form>
+                    @endif
 
                     {{-- Delete Order (Admin only) --}}
                     <form action="{{ route('admin.orders.destroy', $order) }}" method="POST"

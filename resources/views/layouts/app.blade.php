@@ -16,7 +16,8 @@ scale=1">
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 @stack('styles')
 </head>
-<body class="font-sans antialiased bg-gray-100">
+<body class="font-sans antialiased bg-black text-black">
+
 <div class="min-h-screen">
 @include('partials.navigation')
 <!-- Page Heading -->

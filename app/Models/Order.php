@@ -35,7 +35,7 @@ class Order extends Model
     // Helper method to check if order is cancellable
     public function isCancellable()
     {
-        return $this->status === self::STATUS_PENDING;
+        return $this->status === self::STATUS_PROCESSING || $this->status === self::STATUS_PENDING;
     }
 
     // Accessor for subtotal

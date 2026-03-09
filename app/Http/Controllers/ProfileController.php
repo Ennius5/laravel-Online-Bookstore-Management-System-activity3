@@ -75,7 +75,8 @@ public function dashboard(Request $request): View
                           ->latest()
                           ->limit(5)
                           ->get();
+    $adminReviews = Review::latest()->limit(10)->get();
 
-    return view('dashboard', compact('user', 'recentOrders', 'recentReviews'));
+    return view('dashboard', compact('user', 'recentOrders', 'recentReviews', 'adminReviews'));
 }
 }

@@ -6,24 +6,42 @@
 <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
     <div class="md:flex md:items-center md:justify-between mb-8">
         <div>
-                    @auth
-            @if(auth()->user()->isAdmin())
-                <h1 class="text-3xl font-bold text-gray-900">Customer Orders</h1>
-                <p class="mt-2 text-gray-600">View and manage customer orders</p>
-            @else
-                <h1 class="text-3xl font-bold text-gray-900">My Orders</h1>
-                <p class="mt-2 text-gray-600">View and manage your order history</p>
-            @endif
-        @endauth
-
+            @auth
+                @if(auth()->user()->isAdmin())
+                    <h1 class="text-3xl font-bold text-gray-900">Customer Orders</h1>
+                    <p class="mt-2 text-gray-600">View and manage customer orders</p>
+                @else
+                    <h1 class="text-3xl font-bold text-gray-900">My Orders</h1>
+                    <p class="mt-2 text-gray-600">View and manage your order history</p>
+                @endif
+            @endauth
         </div>
-
-
     </div>
 
     {{-- Filters --}}
     <div class="mb-6 bg-white rounded-lg shadow p-4">
         <div class="flex flex-wrap items-center gap-4">
+            {{-- Search by Customer Name (Admin only) --}}
+            @auth
+                @if(auth()->user()->isAdmin())
+                    <div class="flex-1 min-w-[200px]">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Search Customer</label>
+                        <div class="relative">
+                            <input type="text"
+                                   id="customer-search"
+                                   placeholder="Search by customer name..."
+                                   value="{{ request('customer') }}"
+                                   class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 pl-10">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            @endauth
+
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
                 <select id="status-filter" class="border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
@@ -46,13 +64,51 @@
                 </select>
             </div>
 
-            <div class="flex-1"></div>
-
-            <div>
-                <p class="text-sm text-gray-600">
-                    {{ $orders->total() }} order{{ $orders->total() !== 1 ? 's' : '' }} found
-                </p>
+            {{-- Search Button --}}
+            <div class="self-end">
+                <button id="apply-filters"
+                        class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition font-medium flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    Apply Filters
+                </button>
             </div>
+        </div>
+
+        {{-- Active Filters --}}
+        <div class="mt-3 flex flex-wrap items-center gap-2">
+            @if(request()->has('customer') || request()->has('status') || request()->has('sort'))
+                <span class="text-sm text-gray-600">Active filters:</span>
+
+                @if(request('customer'))
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                        Customer: {{ request('customer') }}
+                        <a href="{{ route('orders.index', array_merge(request()->except('customer'), ['customer' => null])) }}"
+                           class="ml-1 text-indigo-600 hover:text-indigo-800">×</a>
+                    </span>
+                @endif
+
+                @if(request('status') && request('status') != 'all')
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                        Status: {{ ucfirst(request('status')) }}
+                        <a href="{{ route('orders.index', array_merge(request()->except('status'), ['status' => 'all'])) }}"
+                           class="ml-1 text-indigo-600 hover:text-indigo-800">×</a>
+                    </span>
+                @endif
+
+                @if(request('sort') && request('sort') != 'newest')
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                        Sort: {{ ucfirst(str_replace('-', ' ', request('sort'))) }}
+                        <a href="{{ route('orders.index', array_merge(request()->except('sort'), ['sort' => 'newest'])) }}"
+                           class="ml-1 text-indigo-600 hover:text-indigo-800">×</a>
+                    </span>
+                @endif
+
+                <a href="{{ route('orders.index') }}" class="text-sm text-red-600 hover:text-red-800 ml-2">
+                    Clear all
+                </a>
+            @endif
         </div>
     </div>
 
@@ -64,8 +120,14 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                           d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                 </svg>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">No orders yet</h3>
-                <p class="text-gray-600 mb-6">When you place orders, they will appear here.</p>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
+                <p class="text-gray-600 mb-6">
+                    @if(request()->has('customer') || request()->has('status'))
+                        No orders match your search criteria. Try adjusting your filters.
+                    @else
+                        When you place orders, they will appear here.
+                    @endif
+                </p>
                 <a href="{{ route('books.index') }}"
                    class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -101,7 +163,17 @@
                                         {{ ucfirst($order->status) }}
                                     </span>
                                 </div>
-                                <p class="text-sm text-gray-600 mt-1">
+
+                                {{-- Show Customer Name for Admin --}}
+                                @auth
+                                    @if(auth()->user()->isAdmin())
+                                        <p class="text-sm text-gray-600 mt-1">
+                                            <span class="font-medium">Customer:</span> {{ $order->user->name }}
+                                        </p>
+                                    @endif
+                                @endauth
+
+                                <p class="text-sm text-gray-600">
                                     Placed on {{ $order->created_at->format('M j, Y \a\t g:i A') }}
                                 </p>
                                 <p class="text-sm text-gray-600">
@@ -223,30 +295,65 @@
 document.addEventListener('DOMContentLoaded', function() {
     const statusFilter = document.getElementById('status-filter');
     const sortFilter = document.getElementById('sort-filter');
+    const customerSearch = document.getElementById('customer-search');
+    const applyButton = document.getElementById('apply-filters');
 
     function applyFilters() {
         const status = statusFilter.value;
         const sort = sortFilter.value;
+        const customer = customerSearch ? customerSearch.value : '';
 
         // Build query parameters
         const params = new URLSearchParams();
-        if (status !== 'all') params.set('status', status);
-        if (sort !== 'newest') params.set('sort', sort);
+
+        if (customer && customer.trim() !== '') {
+            params.set('customer', customer.trim());
+        }
+
+        if (status !== 'all') {
+            params.set('status', status);
+        }
+
+        if (sort !== 'newest') {
+            params.set('sort', sort);
+        }
 
         // Reload page with filters
-        window.location.href = '{{ route('orders.index') }}?' + params.toString();
+        const url = '{{ route('orders.index') }}?' + params.toString();
+        window.location.href = url;
     }
 
+    // Handle Enter key in search field
+    if (customerSearch) {
+        customerSearch.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                applyFilters();
+            }
+        });
+    }
+
+    // Apply filters on button click
+    if (applyButton) {
+        applyButton.addEventListener('click', applyFilters);
+    }
+
+    // Apply filters on select changes
     statusFilter.addEventListener('change', applyFilters);
     sortFilter.addEventListener('change', applyFilters);
 
     // Set current filter values from URL
     const urlParams = new URLSearchParams(window.location.search);
+
     if (urlParams.has('status')) {
         statusFilter.value = urlParams.get('status');
     }
+
     if (urlParams.has('sort')) {
         sortFilter.value = urlParams.get('sort');
+    }
+
+    if (customerSearch && urlParams.has('customer')) {
+        customerSearch.value = urlParams.get('customer');
     }
 });
 </script>

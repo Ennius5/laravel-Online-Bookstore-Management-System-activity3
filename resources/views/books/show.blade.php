@@ -41,7 +41,7 @@
                     @endif
                 </div>
 
-                <h1 class="text-3xl font-bold text-gray-900 mt-4">{{ $book->title }}</h1>
+                <h1 class="text-3xl font-bold text-amber-500 mt-4">{{ $book->title }}</h1>
                 <p class="text-xl text-gray-600 mt-2">by {{ $book->author }}</p>
 
                 {{-- Rating --}}
@@ -119,22 +119,31 @@
                             </button>
                         </form> --}}
                         {{--FORM FIX -->  --}}
-                         <form action="{{ route('orders.store', $book) }}" method="POST" class="flex items-center gap-2">
+                        @if(auth()->user()->hasVerifiedEmail())
+
+                        <form action="{{ route('orders.addtocart', ) }}" method="POST" class="flex items-center gap-2">
                         @csrf
                             {{-- Hidden field to pass book_id in the order_items array structure --}}
-                            <input type="hidden" name="order_items[0][book_id]" value="{{ $book->id }}">
+                            <input type="hidden" name="book_id" value="{{ $book->id }}">
 
                             <input type="number"
-                                name="order_items[0][quantity]"
+                                name="quantity"
                                 value="1"
                                 min="1"
                                 max="{{ $book->stock_quantity }}"
-                                class="w-20 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                class="text-black w-20 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
 
-                            <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition font-medium">
+                            <button type="submit" class="bg-amber-600 text-white px-6 py-2 rounded-lg hover:bg-amber-700 transition font-medium">
                                 Add to Cart
                             </button>
                         </form>
+                        @else
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+                            <p class="text-blue-700">
+                                <a href="{{ route('verification.notice') }}" class="text-amber-600 hover:underline font-medium">Verify your email</a> to add this book to your cart.
+                            </p>
+                        </div>
+                        @endif
                     @endif
                 </div>
 
@@ -199,7 +208,7 @@
     {{-- Reviews Section --}}
     <div class="mt-12">
         <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">Customer Reviews</h2>
+            <h2 class="text-2xl font-bold text-amber-500">Customer Reviews</h2>
             @if($book->reviews->count() > 0)
                 <span class="text-gray-600">
                     {{ $book->reviews->count() }} review{{ $book->reviews->count() !== 1 ? 's' : '' }}
@@ -209,8 +218,11 @@
 
         {{-- Review Form (for authenticated users) --}}
         @auth
+            @if(auth()->user()->hasVerifiedEmail())
+            @if (auth()->user()->hasbought($book))
+
             <div class="bg-white rounded-2xl shadow p-6 mb-8">
-                <h3 class="font-semibold text-lg text-gray-900 mb-4">Write a Review</h3>
+                <h3 class="font-semibold text-lg text-amber-500 mb-4">Write a Review</h3>
                 <form action="{{ route('reviews.store', $book) }}" method="POST">
                     @csrf
 
@@ -253,13 +265,24 @@
                     </button>
                 </form>
             </div>
+            @else
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+                <p class="text-yellow-700">
+                    You can only review this book when you have a completed order with it.
+                </p>
+            @endif
         @else
             <div class="bg-blue-50 border border-blue-200 rounded-2xl p-6 mb-8 text-center">
                 <p class="text-blue-700">
+                    @if (!auth()->user())
                     <a href="{{ route('login') }}" class="text-indigo-600 hover:underline font-medium">Login</a>
+                    @else
+                    <a href="{{ route('verification.notice') }}" class="text-indigo-600 hover:underline font-medium">Verify Email</a>
+                    @endif
                     to write a review.
                 </p>
             </div>
+        @endif
         @endauth
 
         {{-- Display Reviews --}}
@@ -273,7 +296,7 @@
                                     {{ substr($review->user->name, 0, 1) }}
                                 </div>
                                 <div class="ml-3">
-                                    <p class="font-semibold text-gray-900">{{ $review->user->name }}</p>
+                                    <p class="font-semibold text-amber-500">{{ $review->user->name }}</p>
                                     <div class="flex items-center mt-1">
                                         @for($i = 1; $i <= 5; $i++)
                                             <svg class="h-4 w-4 {{ $i <= $review->rating ? 'text-yellow-400' : 'text-gray-300' }}"
@@ -317,8 +340,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
                 </svg>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">No reviews yet</h3>
-                <p class="text-gray-600">Be the first to share your thoughts about this book!</p>
+                <h3 class="text-lg font-medium text-amber-500 mb-2">No reviews yet</h3>
+                <p class="text-amber-600">Be the first to share your thoughts about this book!</p>
             </div>
         @endif
     </div>

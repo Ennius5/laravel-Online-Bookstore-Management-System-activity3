@@ -13,9 +13,11 @@
                         <p class="mt-1 text-sm text-gray-600">{{ $user->email }}</p>
                         <p class="mt-1 text-xs text-gray-500">Member since {{ $user->created_at->format('M Y') }}</p>
                     </div>
-                    <a href="{{ route('profile.edit') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                        Edit Profile
-                    </a>
+                    @if (!auth()->user()->isAdmin())
+                        <a href="{{ route('profile.edit') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            Edit Profile
+                        </a>
+                    @endif
                 </div>
             </div>
 
@@ -81,9 +83,38 @@
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
                         <div class="flex justify-between items-center mb-4">
+                            @if(auth()->user()->isAdmin())
+                            <h3 class="text-lg font-semibold">Recent Reviews</h3>
+                            @else
                             <h3 class="text-lg font-semibold">Your Reviews</h3>
+                            @endif
                         </div>
-
+                    @if(auth()->user()->isAdmin())
+                        @if($adminReviews->count())
+                            <div class="space-y-4">
+                                @foreach($adminReviews as $review)
+                                    <div class="border-b border-gray-200 pb-3 last:border-0 last:pb-0">
+                                        <div class="flex justify-between">
+                                            <a href="{{ route('books.show', $review->book) }}" class="font-medium text-gray-900 hover:text-blue-600">
+                                                {{ $review->book->title }}
+                                            </a>
+                                            <span class="text-xs text-gray-500">{{ $review->created_at->diffForHumans() }}</span>
+                                        </div>
+                                        <div class="flex items-center mt-1">
+                                            @for($i = 1; $i <= 5; $i++)
+                                                <svg class="w-4 h-4 {{ $i <= $review->rating ? 'text-yellow-400' : 'text-gray-300' }}" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                </svg>
+                                            @endfor
+                                        </div>
+                                        <p class="text-sm text-gray-600 mt-1">"{{ \Str::limit($review->comment, 80) }}"</p>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="text-gray-500">You haven't reviewed any books yet.</p>
+                        @endif
+                    @else
                         @if($recentReviews->count())
                             <div class="space-y-4">
                                 @foreach($recentReviews as $review)
@@ -108,25 +139,25 @@
                         @else
                             <p class="text-gray-500">You haven't reviewed any books yet.</p>
                         @endif
+                    @endif
                     </div>
                 </div>
             </div>
 
-            <!-- Danger Zone -->
-            <div class="mt-6 bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            @if(auth()->user()->isAdmin())
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <h3 class="text-lg font-semibold text-red-600">Danger Zone</h3>
-                    <p class="text-sm text-gray-600 mt-1">Permanently delete your account and all associated data.</p>
-                    <form method="post" action="{{ route('profile.destroy') }}" class="mt-3">
-                        @csrf
-                        @method('delete')
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 active:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150"
-                                onclick="return confirm('Are you sure you want to delete your account? This action cannot be undone.')">
-                            Delete Account
-                        </button>
-                    </form>
-                </div>
+                    <h3 class="text-lg font-semibold text-red-600">Admin Metrics</h3>
+                    <p class="text-sm text-gray-600 mt-1">Key performance indicators and analytics for your bookstore.</p>
+                    <!-- Placeholder for future admin metrics dashboard -->
+                    <div class="mt-4 p-4 bg-gray-100 rounded-lg text-center text-gray-500">
+                        <h3 class="text-lg font-medium">{{ \App\Models\User::count() }} USERS</h3>
+                        <h3 class="text-lg font-medium">{{ \App\Models\Book::count() }} BOOKS</h3>
+                    </div>
+                METRICS
             </div>
+            @endif
+
         </div>
     </div>
 @endsection

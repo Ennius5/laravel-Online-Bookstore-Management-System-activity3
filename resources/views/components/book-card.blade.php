@@ -1,6 +1,6 @@
 @props(['book'])
 
-<div {{ $attributes->merge(['class' => 'bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 transition-transform hover:scale-105']) }}>
+<div {{ $attributes->merge(['class' => 'bg-white rounded-2lg shadow-md shadow-amber-500/50 overflow-hidden hover:shadow-2xl transition-shadow duration-300 transition-transform hover:scale-105']) }}>
     {{-- Cover Image --}}
     <div class="h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
         @if($book->cover_image)
@@ -109,7 +109,7 @@
         {{-- Action Button --}}
         <a
             href="{{ route('books.show', $book) }}"
-            class="mt-auto block text-center bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors duration-200 font-medium"
+            class="mt-auto block text-center bg-amber-600 text-white py-2 px-4 rounded-md hover:bg-amber-700 transition-colors duration-200 font-medium"
         >
             View Details
         </a>

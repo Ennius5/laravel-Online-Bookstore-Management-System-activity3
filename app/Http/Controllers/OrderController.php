@@ -10,54 +10,57 @@ use App\Http\Requests\UpdateOrderRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Log;
+
+
+use App\Models\User;
+use App\Mail\NewOrderNotification;
+use App\Mail\OrderStatusUpdate;
+use Illuminate\Support\Facades\Mail;
 class OrderController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
-    {
-        $query = Order::with(['user', 'orderItems.book'])
-            ->latest();
+public function index(Request $request)
+{
+    $query = Order::with(['user', 'orderItems.book']);
 
-        // Filter by status if provided
-        if ($request->has('status') && $request->status != '') {
-            $query->where('status', $request->status);
-        }
-
-        // Filter by user if admin, otherwise show only user's orders
-        if (!auth()->user()->isAdmin()) {//false positive from intelliphense,
-            $query->where('user_id', auth()->id());//false positive from intelliphense,
-        } elseif ($request->has('user_id') && $request->user_id != '') {
-            $query->where('user_id', $request->user_id);
-        }
-
-        // Search by order ID or user name/email
-        if ($request->has('search') && $request->search != '') {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('id', 'like', "%{$search}%")
-                  ->orWhereHas('user', function ($userQuery) use ($search) {
-                      $userQuery->where('name', 'like', "%{$search}%")
-                               ->orWhere('email', 'like', "%{$search}%");
-                  });
-            });
-        }
-
-        // Date range filtering
-        if ($request->has('start_date') && $request->start_date != '') {
-            $query->whereDate('created_at', '>=', $request->start_date);
-        }
-
-        if ($request->has('end_date') && $request->end_date != '') {
-            $query->whereDate('created_at', '<=', $request->end_date);
-        }
-
-        $orders = $query->paginate(15);
-        $statuses = ['pending', 'processing', 'completed', 'cancelled', 'shipped'];
-
-        return view('orders.index', compact('orders', 'statuses'));
+    // Filter by user for non-admins
+    if (!auth()->user()->isAdmin()) {
+        $query->where('user_id', auth()->id());
     }
+
+    // Search by customer name (admin only)
+    if (auth()->user()->isAdmin() && $request->has('customer') && !empty($request->customer)) {
+        $query->whereHas('user', function($q) use ($request) {
+            $q->where('name', 'LIKE', '%' . $request->customer . '%');
+        });
+    }
+
+    // Filter by status
+    if ($request->has('status') && $request->status !== 'all') {
+        $query->where('status', $request->status);
+    }
+
+    // Sorting
+    switch ($request->get('sort', 'newest')) {
+        case 'oldest':
+            $query->orderBy('created_at', 'asc');
+            break;
+        case 'price-high':
+            $query->orderBy('total_amount', 'desc');
+            break;
+        case 'price-low':
+            $query->orderBy('total_amount', 'asc');
+            break;
+        default: // newest
+            $query->orderBy('created_at', 'desc');
+    }
+
+    $orders = $query->paginate(10)->withQueryString();
+
+    return view('orders.index', compact('orders'));
+}
 
     /**
      * Show the form for creating a new resource.
@@ -68,8 +71,97 @@ class OrderController extends Controller
         return view('orders.create', compact('books'));
     }
 
+
+
+
+    //Search for user's current pending order
+    //if such exists, add orderItem to it. Otherwise, create a new order and then add orderItem it.
+    public function addToCart(Request $request,)
+    {
+        $request->validate([
+            'quantity' => 'required|integer|min:1'
+        ]);
+        $book = Book::findOrFail($request->book_id);
+        $quantity = $request->input('quantity');
+        $userId = auth()->id();
+        Log::info("Adding to cart: User ID =>>> $userId, Book ID =>>> {$book->id}, Quantity =>>> $quantity");
+        // Check if user has a pending order
+        $order = Order::firstOrCreate(
+            ['user_id' => $userId, 'status' => 'pending'],
+            ['total_amount' => 0] // default total_amount, will be updated later
+        );
+
+        //check if no stock left first before adding to cart
+        if ($book->stock_quantity < $quantity) {
+            throw new \Exception("Insufficient stock for {$book->title}. Available: {$book->stock_quantity}");
+        }
+        // Check if the book is already in the cart
+        $orderItem = OrderItem::where('order_id', $order->id)
+                              ->where('book_id', $book->id)
+                              ->first();
+
+        if ($orderItem) {
+            // Update quantity and unit price
+            $orderItem->quantity += $quantity;
+            $orderItem->unit_price = $book->price; // Update to current price
+            $orderItem->save();
+        } else {
+            // Create new order item
+            OrderItem::create([
+                'order_id' => $order->id,
+                'book_id' => $book->id,
+                'quantity' => $quantity,
+                'unit_price' => $book->price,
+            ]);
+        }
+        // and then decrease the stock quantity of the book
+        $book->decrement('stock_quantity', $quantity);
+
+
+        // Update order total amount
+        $order->total_amount = $order->orderItems()->sum(DB::raw('quantity * unit_price'));
+        $order->save();
+
+        return redirect()->route('orders.show', $order)
+                         ->with('success', "{$book->title} added to cart!");
+    }
+    //When process order is called, it will check if the order is pending, if so, it will update the order status to processing and reduce the stock quantity of the ordered books. If the order is cancelled, it will restore the stock quantity of the ordered books.
+    public function processOrder(Request $request)
+    {
+        Log::info('Processing order with request data: ', ['request' => $request->all()]);
+        $order = Order::findOrFail($request->order_id);
+        if ($order->status !== 'pending') {
+            return back()->with('error', 'Only pending orders can be processed.');
+        }
+
+        DB::beginTransaction();
+
+        try {
+            // Update order status
+            $order->update(['status' => 'processing']);
+
+            DB::commit();
+        // Send status update email to customer
+        Mail::to($order->user->email)->send(new NewOrderNotification($order, 'customer'));
+        //to admin
+        $admins = User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            Mail::to($admin->email)->send(new NewOrderNotification($order, 'admin'));
+        }
+            return redirect()->route('orders.show', $order)
+                             ->with('success', 'Order processed successfully!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Failed to process order: ' . $e->getMessage());
+        }
+    }
+
+
+
+
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created resource in storage. Will be deprecated byebye!
      */
     public function store(StoreOrderRequest $request)
     {
@@ -134,6 +226,9 @@ class OrderController extends Controller
             return back()->withInput()->with('error', $e->getMessage());
         }
     }
+
+
+
 
     /**
      * Display the specified resource.
@@ -258,6 +353,13 @@ class OrderController extends Controller
 
             DB::commit();
 
+                    // Update order status
+        $oldStatus = $order->status;
+        $order->status = 'processing';
+        $order->save();
+
+        // Send status update email to customer
+        Mail::to($order->user->email)->send(new OrderStatusUpdate($order, $oldStatus));
             return redirect()->route('orders.show', $order)
                 ->with('success', 'Order updated successfully!');
 
@@ -356,6 +458,7 @@ class OrderController extends Controller
 
             DB::commit();
 
+            Mail::to($order->user->email)->send(new OrderStatusUpdate($order, $oldStatus));
             return redirect()->route('orders.show', $order)
                 ->with('success', "Order status updated to {$newStatus}.");
 
@@ -394,8 +497,8 @@ class OrderController extends Controller
             abort(403, 'Unauthorized access.');
         }
 
-        if ($order->status !== 'pending') {
-            return back()->with('error', 'Only pending orders can be cancelled.');
+        if ($order->status !== 'processing') {
+            return back()->with('error', 'Only processing orders can be cancelled.');
         }
 
         DB::beginTransaction();

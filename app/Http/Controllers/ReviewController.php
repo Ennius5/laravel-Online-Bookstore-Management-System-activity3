@@ -6,6 +6,9 @@ use App\Models\Book;
 use App\Models\Review;
 use App\Http\Requests\StoreReviewRequest;
 use Illuminate\Http\Request;
+use Mail;
+use App\Mail\ReviewConfirmation;
+use App\Mail\ReviewNotification;
 
 class ReviewController extends Controller
 {
@@ -26,9 +29,19 @@ class ReviewController extends Controller
         if ($existingReview) {
             $existingReview->update($validated);
             $message = 'Review updated successfully!';
+            try {
+                Mail::to(auth()->user()->email)->send(new ReviewNotification($existingReview, 'customer'));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send review confirmation: ' . $e->getMessage());
+            }
         } else {
-            Review::create($validated);
+            $review = Review::create($validated);
             $message = 'Review submitted successfully!';
+                        try {
+                Mail::to(auth()->user()->email)->send(new ReviewConfirmation($review));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send review update confirmation: ' . $e->getMessage());
+            }
         }
 
         return redirect()->route('books.show', $book)
@@ -52,6 +65,7 @@ class ReviewController extends Controller
 
         $review->update($validated);
 
+
         return redirect()->route('books.show', $book)
             ->with('success', 'Review updated successfully!');
     }
@@ -65,7 +79,7 @@ class ReviewController extends Controller
         if (auth()->id() !== $review->user_id && !optional(auth()->user())->isAdmin()) {//false positive from intelliphense,
             abort(403);
         }
-
+        $book = Book::findOrFail($review->book_id);
         $review->delete();
 
         return redirect()->route('books.show', $book)
