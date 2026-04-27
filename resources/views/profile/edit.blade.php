@@ -21,6 +21,9 @@
                         @csrf
                         @method('patch')
 
+                        @php
+                        $emaill = $user -> email;
+                        @endphp
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
                             <input
@@ -64,6 +67,26 @@
                                 </div>
                             @endif
                         </div>
+
+
+    <form method="POST" action="{{ route('password.email') }}">
+        @csrf
+
+        <!-- Email Address -->
+        <div>
+            <x-input-label for="email" :value="__('reset your password: '.$emaill)" />
+            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="$emaill" hidden  required autofocus />
+            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        </div>
+
+        <div class="flex items-center justify-end mt-4">
+            <x-primary-button>
+                {{ __('Email Password Reset Link') }}
+            </x-primary-button>
+        </div>
+    </form>
+
+
                         <!-- Two-Factor Authentication Link -->
                         <x-responsive-nav-link :href="route('profile.two-factor')" :active="request()->routeIs('profile.two-factor')">
                             {{ __('Two-Factor Auth') }}

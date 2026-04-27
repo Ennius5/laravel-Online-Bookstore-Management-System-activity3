@@ -153,8 +153,18 @@
                     <div class="mt-4 p-4 bg-gray-100 rounded-lg text-center text-gray-500">
                         <h3 class="text-lg font-medium">{{ \App\Models\User::count() }} USERS</h3>
                         <h3 class="text-lg font-medium">{{ \App\Models\Book::count() }} BOOKS</h3>
+                        <h3 class="text-lg font-medium">{{ \App\Models\Review::count() }} REVIEWS</h3>
+                        <h3 class="text-lg font-medium">{{ \App\Models\Order::count() }} Orders</h3>
+                        <h3 class="text-lg font-medium">{{ \App\Models\OrderItem::count() }} ORDERED ITEMS</h3>
                     </div>
-                METRICS
+                    <h3 class="text-lg font-semibold text-red-600">Further admin actions</h3>
+                    <div class="mt-4 flex gap-3">
+                        <a href="{{ route('admin.books.import-export') }}"
+                        class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 transition ease-in-out duration-150">
+                            📥 Import / Export Books
+                        </a>
+                    </div>
+
             </div>
             @endif
 

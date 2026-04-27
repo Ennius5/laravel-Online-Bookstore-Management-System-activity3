@@ -8,8 +8,11 @@ use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
-
+use App\Http\Controllers\Admin\BookImportExportController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\Admin\OrderExportController;
+use App\Http\Controllers\Admin\UserImportExportController;
+
 
 // Public routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -40,6 +43,15 @@ Route::middleware('auth')->group(function () {
     // Order routes (authenticated)
     Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
     Route::delete('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+
+    // User Import/Export
+    Route::get('/users/import-export', [UserImportExportController::class, 'index'])->name('users.import-export');
+    Route::post('/users/import', [UserImportExportController::class, 'import'])->name('users.import');
+    Route::get('/users/export', [UserImportExportController::class, 'export'])->name('users.export');
+
+    // Customer routes
+    Route::get('/orders/export/my-orders', [OrderExportController::class, 'myOrders'])->name('orders.export.my');
+    Route::get('/orders/{order}/invoice', [OrderExportController::class, 'invoice'])->name('orders.invoice');
 
     // 2FA Settings (authenticated)
     Route::get('/profile/two-factor', [TwoFactorController::class, 'settings'])
@@ -80,7 +92,28 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
     Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
-});
+
+    //Import/Export
+    Route::get('/books/import-export', [BookImportExportController::class, 'index'])
+        ->name('books.import-export');
+    Route::post('/books/import', [BookImportExportController::class, 'import'])
+        ->name('books.import');
+    Route::get('/books/export', [BookImportExportController::class, 'export'])
+        ->name('books.export');
+    Route::get('/books/template', [BookImportExportController::class, 'downloadTemplate'])
+        ->name('books.template');
+
+
+
+
+
+
+
+// Inside admin group
+        Route::get('/orders/export', [OrderExportController::class, 'index'])->name('orders.export.index');
+        Route::get('/orders/export/download', [OrderExportController::class, 'export'])->name('orders.export.download');
+        Route::get('/orders/export/financial', [OrderExportController::class, 'financialReport'])->name('orders.export.financial');
+    });
 
 // Debug route (remove in production)
 Route::get('/debug-vite', function() {
