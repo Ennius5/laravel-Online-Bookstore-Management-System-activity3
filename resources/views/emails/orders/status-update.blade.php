@@ -80,7 +80,7 @@
         @endphp
         .button {
             display: inline-block;
-            background-color: #4f46e5;
+            background-color: #131223;
             color: white;
             text-decoration: none;
             padding: 12px 25px;
@@ -124,10 +124,13 @@
             </p>
 
             <div style="text-align: center;">
-                <a href="{{ route('orders.show', $order) }}" class="button">
+                <a class="text-amber-600 mt-1" href="{{ route('orders.show', $order) }}" class="button">
                     Track Your Order
                 </a>
-            </div>
+                <a class="text-blue-600 mt-1" href="{{ route('orders.invoice',['order' => $order->id]) }}">
+                    Get Invoice
+                </a>
+                </div>
         </div>
 
         <div class="footer">

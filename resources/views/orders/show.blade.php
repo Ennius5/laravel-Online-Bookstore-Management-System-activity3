@@ -13,7 +13,11 @@
                     <p class="text-gray-600 mt-1">
                         Placed on {{ $order->created_at->format('F j, Y \a\t g:i A') }}
                     </p>
+                    <a class="text-blue-600 mt-1" href="{{ route('orders.invoice',['order' => $order->id]) }}">
+                        Get Invoice
+                    </a>
                 </div>
+
 
                 <div class="flex items-center space-x-4">
                     {{-- Order Status Badge --}}

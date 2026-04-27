@@ -12,7 +12,7 @@ class UserImportExportController extends Controller
 {
     public function index()
     {
-        return view('admin.users.import-export');
+        return view('users.import-export');
     }
 
     public function import(Request $request)

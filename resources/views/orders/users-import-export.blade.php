@@ -13,7 +13,7 @@
                     <h2 class="text-xl font-semibold text-gray-900">User Import / Export</h2>
                     <p class="mt-1 text-sm text-gray-600">Bulk create user accounts or export user data with optional GDPR redaction.</p>
                 </div>
-                <a href="{{ route('admin.users.import-export') }}"
+                <a href="{{ route('users.import-export') }}"
                    onclick="return false;"
                    class="inline-flex items-center px-4 py-2 bg-gray-100 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-200 transition ease-in-out duration-150">
                     ⬇ Download User Template
@@ -41,7 +41,7 @@
                     <h3 class="text-lg font-semibold text-gray-900 mb-1">👥 Import Users</h3>
                     <p class="text-sm text-gray-500 mb-4">Bulk create accounts for corporate or institutional users. Existing emails are skipped automatically.</p>
 
-                    <form action="{{ route('admin.users.import') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                    <form action="{{ route('users.import') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                         @csrf
 
                         {{-- File Drop Zone --}}
