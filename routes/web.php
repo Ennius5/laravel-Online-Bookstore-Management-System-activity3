@@ -80,6 +80,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::delete('/categories/{category}', [CategoryController::class,'destroy'])->name('categories.destroy');
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
     Route::get('categories/{category}/books', [BookController::class, 'getBooks']);
+    Route::get('/backup', [App\Http\Controllers\Admin\BackupController::class, 'index'])->name('backup.index');
+    Route::post('/backup/trigger', [App\Http\Controllers\Admin\BackupController::class, 'trigger'])->name('backup.trigger');
 
     // Book management
     Route::get('/books/create', [BookController::class, 'create'])->name('books.create');
@@ -107,7 +109,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
 
 
-
+;
 
 // Inside admin group
         Route::get('/orders/export', [OrderExportController::class, 'index'])->name('orders.export.index');

@@ -171,6 +171,12 @@
                     <div class="mt-4 flex gap-3">
                         <a href="{{ route('users.import-export') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 transition ease-in-out duration-150">>👥 User Import/Export</a>
                     </div>
+                    <div class="mt-4 flex gap-3">
+                        <a href="{{ route('admin.backup.index') }}"
+                        class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 transition ease-in-out duration-150">
+                        💾 Backup Management
+                        </a>
+                    </div>
 
             </div>
             @endif
