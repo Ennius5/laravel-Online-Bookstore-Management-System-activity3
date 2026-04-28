@@ -7,12 +7,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Builder;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
+use \OwenIt\Auditing\Auditable;
 
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements MustVerifyEmail, AuditableContract
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, Auditable;
 
     /**
      * The attributes that are mass assignable.
@@ -29,6 +31,14 @@ class User extends Authenticatable implements MustVerifyEmail
         'two_factor_expires_at',
     ];
 
+        /**
+     * Disable automatic audit events for the User model.
+     * We'll log security events manually (login, logout, password changes, etc.)
+     */
+    public function getAuditEvents(): array
+    {
+        return [];
+    }
     /**
      * The attributes that should be hidden for serialization.
      *

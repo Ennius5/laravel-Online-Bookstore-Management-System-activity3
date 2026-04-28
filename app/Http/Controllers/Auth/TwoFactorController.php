@@ -80,6 +80,8 @@ class TwoFactorController extends Controller
         session(['two_factor:enabling' => true]);
         session(['two_factor:user:id' => $user->id]);
 
+        \App\Services\AuditService::log('2fa_enabled', 'App\Models\User', $user->id);
+
         return redirect()->route('two-factor.challenge')
             ->with('status', 'Verification code sent to your email.');
     }
@@ -108,6 +110,7 @@ class TwoFactorController extends Controller
         }
 
         $user = \App\Models\User::find($userId);
+
 
         if (!$user) {
             Log::error('VERIFY 2FA - User not found');
@@ -244,7 +247,7 @@ class TwoFactorController extends Controller
         $user->two_factor_code = null;
         $user->two_factor_expires_at = null;
         $user->save();
-
+        \App\Services\AuditService::log('2fa_disabled', 'App\Models\User', $user->id);
         return back()->with('success', '2FA disabled.');
     }
 }

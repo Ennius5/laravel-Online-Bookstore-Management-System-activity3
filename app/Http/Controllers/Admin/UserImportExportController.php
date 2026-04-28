@@ -12,7 +12,11 @@ class UserImportExportController extends Controller
 {
     public function index()
     {
-        return view('users.import-export');
+            $importLogs = \App\Models\ImportLog::where('user_id', auth()->id())
+        ->latest()->take(10)->get();
+    $exportLogs = \App\Models\ExportLog::where('user_id', auth()->id())
+        ->latest()->take(10)->get();
+        return view('users.import-export',compact('importLogs', 'exportLogs'));
     }
 
     public function import(Request $request)

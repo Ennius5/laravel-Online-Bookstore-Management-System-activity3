@@ -86,6 +86,8 @@ public function index(Request $request)
         $userId = auth()->id();
         Log::info("Adding to cart: User ID =>>> $userId, Book ID =>>> {$book->id}, Quantity =>>> $quantity");
         // Check if user has a pending order
+        // dd(auth()->user() instanceof \OwenIt\Auditing\Contracts\Auditable);
+
         $order = Order::firstOrCreate(
             ['user_id' => $userId, 'status' => 'pending'],
             ['total_amount' => 0] // default total_amount, will be updated later

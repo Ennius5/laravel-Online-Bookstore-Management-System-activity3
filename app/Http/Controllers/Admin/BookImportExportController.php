@@ -23,6 +23,13 @@ class BookImportExportController extends Controller
         return view('books.import-export', compact('importLogs', 'exportLogs'));
     }
 
+        // Show the import/export page
+    public function userIndex()
+    {
+
+        return view('users.import-export', );
+    }
+
     // Handle file upload & import
 public function import(Request $request)
 {
@@ -62,7 +69,7 @@ public function export(Request $request)
         'user_id' => auth()->id(),
         'format'  => $request->input('format', 'xlsx'),
         'filters' => $filters,
-        'status'  => 'pending',
+        'status'  => 'Completed',
     ]);
 
     $filename = 'books_export_' . now()->format('Y-m-d_His') . '.' . $log->format;
@@ -72,6 +79,7 @@ public function export(Request $request)
         $filename
     );
 }
+
 
     // Download blank import template
     public function downloadTemplate()

@@ -12,6 +12,7 @@ use Illuminate\View\View;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\TwoFactorCode;
+Use App\Services\AuditService;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -28,7 +29,13 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        $request->authenticate();
+        try {
+            $request->authenticate();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Log failed login for the email that attempted
+            AuditService::log('login_failed', \App\Models\User::class, null, ['email' => $request->email]);
+            throw $e;
+        }
 
         $user = Auth::user();
 
@@ -48,7 +55,7 @@ class AuthenticatedSessionController extends Controller
                 return redirect()->route('two-factor.challenge');
             }
         }
-
+        \App\Services\AuditService::log('login', 'App\Models\User', $user->id);
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard', absolute: false));
@@ -59,11 +66,16 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $user = Auth::user();
+        \App\Services\AuditService::log('logout', 'App\Models\User', $user->id);
+
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
 
         $request->session()->regenerateToken();
+
 
         return redirect('/');
     }

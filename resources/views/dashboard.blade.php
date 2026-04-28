@@ -13,11 +13,19 @@
                         <p class="mt-1 text-sm text-gray-600">{{ $user->email }}</p>
                         <p class="mt-1 text-xs text-gray-500">Member since {{ $user->created_at->format('M Y') }}</p>
                     </div>
-                    @if (!auth()->user()->isAdmin())
-                        <a href="{{ route('profile.edit') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                            Edit Profile
+                    <div class="flex items-center gap-3">
+                        {{-- Export button for everyone --}}
+                        <a href="{{ route('books.exportCatalogue') }}"
+                           class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 transition ease-in-out duration-150">
+                            📤 Export Book Catalogue
                         </a>
-                    @endif
+                        @if (!auth()->user()->isAdmin())
+                            <a href="{{ route('profile.edit') }}"
+                               class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 transition ease-in-out duration-150">
+                                Edit Profile
+                            </a>
+                        @endif
+                    </div>
                 </div>
             </div>
 
@@ -166,10 +174,10 @@
                     </div>
 
                     <div class="mt-4 flex gap-3">
-                        <a href="{{ route('admin.orders.export.index') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 transition ease-in-out duration-150">>📦 Order Export</a>
+                        <a href="{{ route('admin.orders.export.index') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 transition ease-in-out duration-150">📦 Order Export</a>
                     </div>
                     <div class="mt-4 flex gap-3">
-                        <a href="{{ route('users.import-export') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 transition ease-in-out duration-150">>👥 User Import/Export</a>
+                        <a href="{{ route('admin.users.import-export') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 transition ease-in-out duration-150">👥 User Import/Export</a>
                     </div>
                     <div class="mt-4 flex gap-3">
                         <a href="{{ route('admin.backup.index') }}"
@@ -177,7 +185,13 @@
                         💾 Backup Management
                         </a>
                     </div>
-
+                    <div class="mt-4 flex gap-3">
+                        <a href="{{ route('admin.audit.index') }}"
+                            class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 transition ease-in-out duration-150">
+                            📋 Audit Log
+                        </a>
+                    </div>
+                </div>
             </div>
             @endif
 

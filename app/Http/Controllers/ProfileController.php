@@ -48,7 +48,7 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
-
+        // \App\Services\AuditService::log('logout', 'App\Models\User', $user->id);
         Auth::logout();
 
         $user->delete();

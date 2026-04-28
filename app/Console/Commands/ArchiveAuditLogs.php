@@ -3,28 +3,17 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use OwenIt\Auditing\Models\Audit;
 
 class ArchiveAuditLogs extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'app:archive-audit-logs';
+    protected $signature = 'audit:archive';
+    protected $description = 'Archive audit logs older than 1 year';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Command description';
-
-    /**
-     * Execute the console command.
-     */
     public function handle()
     {
-        //
+        $count = Audit::where('created_at', '<', now()->subYear())->delete();
+        $this->info("Archived {$count} audit records.");
+        \Log::info("audit:archive removed {$count} old records.");
     }
 }
