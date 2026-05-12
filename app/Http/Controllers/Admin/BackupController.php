@@ -11,7 +11,7 @@ use Spatie\Backup\Config\MonitoredBackupsConfig;   // ✅ import this
 class BackupController extends Controller
 {
 
-    public function index()
+public function index()
 {
     $monitoredConfig = MonitoredBackupsConfig::fromArray(config('backup.monitor_backups'));
     $statuses = BackupDestinationStatusFactory::createForMonitorConfig($monitoredConfig);
@@ -19,7 +19,6 @@ class BackupController extends Controller
     $backupStatus = [];
     foreach ($statuses as $status) {
         $destination = $status->backupDestination();
-
         $newestBackup = $destination->newestBackup();
         $backupStatus[] = [
             'disk'         => $destination->diskName(),
@@ -30,7 +29,24 @@ class BackupController extends Controller
         ];
     }
 
-    return view('admin.backup.index', compact('backupStatus'));
+    // Also list manual .sql backups
+    $appName    = config('backup.backup.name');
+    $backupDir  = storage_path('app/' . $appName);
+    $manualBackups = [];
+
+    if (file_exists($backupDir)) {
+        $files = glob($backupDir . '/*.sql');
+        rsort($files); // newest first
+        foreach ($files as $file) {
+            $manualBackups[] = [
+                'filename' => basename($file),
+                'size'     => $this->formatBytes(filesize($file)),
+                'date'     => date('Y-m-d H:i:s', filemtime($file)),
+            ];
+        }
+    }
+
+    return view('admin.backup.index', compact('backupStatus', 'manualBackups'));
 }
 
 /**
@@ -54,10 +70,21 @@ public function trigger()
 {
     \Illuminate\Support\Facades\Log::info('Manual backup triggered by user: ' . auth()->user()->name . ' (ID: ' . auth()->id() . ')');
 
-    Artisan::call('backup:run');
+    $output   = [];
+    $exitCode = 0;
+    $artisan  = base_path('artisan'); // ✅ full path to artisan file
 
-    \Illuminate\Support\Facades\Log::info('Manual backup completed.');
+    exec("php \"{$artisan}\" backup:run --only-db 2>&1", $output, $exitCode);
 
-    return redirect()->route('admin.backup.index')->with('status', 'Backup started successfully!');
+    $outputText = implode("\n", $output);
+    \Illuminate\Support\Facades\Log::info('Backup output: ' . $outputText);
+
+    if ($exitCode === 0) {
+        return redirect()->route('admin.backup.index')
+            ->with('status', 'Backup completed successfully!');
+    } else {
+        return redirect()->route('admin.backup.index')
+            ->with('error', 'Backup failed. Check logs for details.');
+    }
 }
 }

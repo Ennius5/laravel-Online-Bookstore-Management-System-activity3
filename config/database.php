@@ -69,7 +69,7 @@ return [
             'dump' => [
                 'dump_binary_path' => 'C:/xampp/mysql/bin/',
                     'use_single_transaction' => true,
-                    'host' => '127.0.0.1',  // force IP instead of socket
+                    'host' => 'localhost',  // force IP instead of socket
                     'port' => '3306',
                 ],
             ],

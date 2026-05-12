@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use OwenIt\Auditing\Models\Audit;
+use Log;
 
 class AuditController extends Controller
 {
@@ -15,6 +16,7 @@ class AuditController extends Controller
         // Filtering
         if ($request->filled('user_id')) {
             $query->where('user_id', $request->user_id);
+            Log::info('The user id is'. $request->user_id);
         }
         if ($request->filled('event')) {
             $query->where('event', $request->event);

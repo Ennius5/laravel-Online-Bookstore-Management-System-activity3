@@ -45,15 +45,7 @@
                 <tr>
                     <td class="p-2 border">{{ $audit->created_at->format('Y-m-d H:i:s') }}</td>
                     <td class="p-2 border">
-                        @php
-                            $userName = 'System';
-                            $userRaw = $audit->getRawOriginal('user');   // reads the JSON column directly
-                            if ($userRaw) {
-                                $userData = is_string($userRaw) ? json_decode($userRaw) : $userRaw;
-                                $userName = $userData->name ?? 'System';
-                            }
-                        @endphp
-                        {{ $userName }}
+                        {{ $audit->user->name ?? 'System' }}
                     </td>
                     <td class="p-2 border">{{ $audit->event }}</td>
                     <td class="p-2 border">{{ class_basename($audit->auditable_type) }}</td>
