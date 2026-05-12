@@ -119,7 +119,13 @@
                             </button>
                         </form> --}}
                         {{--FORM FIX -->  --}}
-                        @if(auth()->user()->hasVerifiedEmail())
+                        @if (auth()->guest())
+                                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+                            <p class="text-blue-700">
+                                <a href="{{ route('login') }}" class="text-amber-600 hover:underline font-medium">Login</a> to add this book to your cart.
+                            </p>
+                        </div>
+                        @elseif(auth()->user()->hasVerifiedEmail())
 
                         <form action="{{ route('orders.addtocart', ) }}" method="POST" class="flex items-center gap-2">
                         @csrf

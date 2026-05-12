@@ -58,10 +58,21 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CA : \PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
-            ]) : [],
-        ],
+            'options' => [
+    PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'utf8mb4'",
+    PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
+    PDO::ATTR_PERSISTENT => false,
+    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+    // Force TCP
+    1002 => 'SET SESSION wait_timeout=28800',
+],
+            'dump' => [
+                'dump_binary_path' => 'C:/xampp/mysql/bin/',
+                    'use_single_transaction' => true,
+                    'host' => '127.0.0.1',  // force IP instead of socket
+                    'port' => '3306',
+                ],
+            ],
 
         'mariadb' => [
             'driver' => 'mariadb',

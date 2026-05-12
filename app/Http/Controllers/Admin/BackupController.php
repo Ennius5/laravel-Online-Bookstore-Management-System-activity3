@@ -50,9 +50,14 @@ private function formatBytes($bytes, $precision = 2)
     return round($bytes / (1024 ** $pow), $precision) . ' ' . $units[$pow];
 }
 
-    public function trigger()
-    {
-        Artisan::call('backup:run');
-        return redirect()->route('admin.backup.index')->with('status', 'Backup started successfully!');
-    }
+public function trigger()
+{
+    \Illuminate\Support\Facades\Log::info('Manual backup triggered by user: ' . auth()->user()->name . ' (ID: ' . auth()->id() . ')');
+
+    Artisan::call('backup:run');
+
+    \Illuminate\Support\Facades\Log::info('Manual backup completed.');
+
+    return redirect()->route('admin.backup.index')->with('status', 'Backup started successfully!');
+}
 }

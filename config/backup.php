@@ -186,6 +186,7 @@ return [
          * Set to `0` for none
          */
         'retry_delay' => 0,
+        'database_dump_binary_path' => 'C:/xampp/mysql/bin/',
     ],
 
     /*
@@ -336,6 +337,8 @@ return [
          * Set to `0` for none
          */
         'retry_delay' => 0,
+
+
     ],
 
 ];

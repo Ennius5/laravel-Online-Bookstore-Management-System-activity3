@@ -26,8 +26,11 @@ class BookImportExportController extends Controller
         // Show the import/export page
     public function userIndex()
     {
-
-        return view('users.import-export', );
+        $importLogs = ImportLog::where('user_id', auth()->id())
+            ->latest()->take(10)->get();
+        $exportLogs = ExportLog::where('user_id', auth()->id())
+            ->latest()->take(10)->get();
+        return view('books.import-export', compact('importLogs', 'exportLogs'));
     }
 
     // Handle file upload & import

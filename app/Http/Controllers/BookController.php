@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 use App\Models\Category;
 use App\Http\Requests\StoreBookRequest;
+use App\Models\ReadingHistory;
 use App\Http\Requests\UpdateBookRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -125,6 +126,12 @@ class BookController extends Controller
     public function show(Book $book)
     {
         $book->load(['category', 'reviews.user']);
+        if (auth()->check()) {
+    ReadingHistory::create([
+        'user_id' => auth()->id(),
+        'book_id' => $book->id,
+    ]);
+}
         return view('books.show', compact('book'));
     }
 

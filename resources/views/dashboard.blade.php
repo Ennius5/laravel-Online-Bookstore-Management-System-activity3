@@ -14,11 +14,7 @@
                         <p class="mt-1 text-xs text-gray-500">Member since {{ $user->created_at->format('M Y') }}</p>
                     </div>
                     <div class="flex items-center gap-3">
-                        {{-- Export button for everyone --}}
-                        <a href="{{ route('books.exportCatalogue') }}"
-                           class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 transition ease-in-out duration-150">
-                            📤 Export Book Catalogue
-                        </a>
+
                         @if (!auth()->user()->isAdmin())
                             <a href="{{ route('profile.edit') }}"
                                class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 transition ease-in-out duration-150">
@@ -152,48 +148,153 @@
                 </div>
             </div>
 
-            @if(auth()->user()->isAdmin())
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    <h3 class="text-lg font-semibold text-red-600">Admin Metrics</h3>
-                    <p class="text-sm text-gray-600 mt-1">Key performance indicators and analytics for your bookstore.</p>
-                    <!-- Placeholder for future admin metrics dashboard -->
-                    <div class="mt-4 p-4 bg-gray-100 rounded-lg text-center text-gray-500">
-                        <h3 class="text-lg font-medium">{{ \App\Models\User::count() }} USERS</h3>
-                        <h3 class="text-lg font-medium">{{ \App\Models\Book::count() }} BOOKS</h3>
-                        <h3 class="text-lg font-medium">{{ \App\Models\Review::count() }} REVIEWS</h3>
-                        <h3 class="text-lg font-medium">{{ \App\Models\Order::count() }} Orders</h3>
-                        <h3 class="text-lg font-medium">{{ \App\Models\OrderItem::count() }} ORDERED ITEMS</h3>
+        @if(auth()->user()->isAdmin())
+    {{-- ========== ADMIN DASHBOARD WIDGETS (Section 4.6) ========== --}}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {{-- Widget 1: Import/Export Status --}}
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-blue-800 mb-3">📦 Import/Export Status</h3>
+            <div class="flex justify-between mb-2">
+                <div>
+                    <span class="text-sm text-gray-500">Import today</span>
+                    <div class="text-sm">
+                        <span class="text-green-600 font-medium">✔ {{ $todayImportSuccess }}</span>
+                        <span class="mx-1">/</span>
+                        <span class="text-red-600 font-medium">✘ {{ $todayImportFailed }}</span>
                     </div>
-                    <h3 class="text-lg font-semibold text-red-600">Further admin actions</h3>
-                    <div class="mt-4 flex gap-3">
-                        <a href="{{ route('admin.books.import-export') }}"
-                        class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 transition ease-in-out duration-150">
-                            📥 Import / Export Books
-                        </a>
-                    </div>
-
-                    <div class="mt-4 flex gap-3">
-                        <a href="{{ route('admin.orders.export.index') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 transition ease-in-out duration-150">📦 Order Export</a>
-                    </div>
-                    <div class="mt-4 flex gap-3">
-                        <a href="{{ route('admin.users.import-export') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 transition ease-in-out duration-150">👥 User Import/Export</a>
-                    </div>
-                    <div class="mt-4 flex gap-3">
-                        <a href="{{ route('admin.backup.index') }}"
-                        class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 transition ease-in-out duration-150">
-                        💾 Backup Management
-                        </a>
-                    </div>
-                    <div class="mt-4 flex gap-3">
-                        <a href="{{ route('admin.audit.index') }}"
-                            class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 transition ease-in-out duration-150">
-                            📋 Audit Log
-                        </a>
+                </div>
+                <div>
+                    <span class="text-sm text-gray-500">Export today</span>
+                    <div class="text-sm">
+                        <span class="text-green-600 font-medium">✔ {{ $todayExportSuccess }}</span>
+                        <span class="mx-1">/</span>
+                        <span class="text-red-600 font-medium">✘ {{ $todayExportFailed }}</span>
                     </div>
                 </div>
             </div>
+            <div class="text-sm text-gray-700 mb-2">
+                <strong>Pending queue jobs:</strong> {{ $pendingJobs }}
+            </div>
+            @if($importLogs && $importLogs->count())
+                <div>
+                    <span class="text-sm font-medium text-gray-600">Recent imports:</span>
+                    <ul class="mt-1 space-y-1 text-xs text-gray-700">
+                        @foreach($importLogs as $log)
+                            <li class="flex justify-between items-center">
+                                <span>{{ $log->filename ?? 'File' }}</span>
+                                <span class="px-1.5 py-0.5 rounded text-xs font-medium
+                                    {{ $log->status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                    {{ $log->status }}
+                                </span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            @else
+                <p class="text-xs text-gray-400 mt-2">No recent imports.</p>
             @endif
+        </div>
+
+        {{-- Widget 2: Backup Status --}}
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-blue-800 mb-3">💾 Backup Status</h3>
+            <div class="mb-2">
+                <span class="text-sm">Status:</span>
+                <span class="ml-1 px-2 py-0.5 rounded text-xs font-medium
+                    {{ $backupStatus['healthy'] ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                    {{ $backupStatus['healthy'] ? 'Healthy' : 'FAILING' }}
+                </span>
+                <span class="text-xs text-gray-500 ml-2">{{ $backupStatus['status_message'] }}</span>
+            </div>
+            <div class="text-sm text-gray-700 space-y-1">
+                <div>📅 Last backup: <strong>{{ $backupStatus['latest_date'] }}</strong></div>
+                <div>📀 Size: <strong>{{ $backupStatus['latest_size'] }}</strong></div>
+                <div>💿 Disk: <strong>{{ $backupStatus['disk'] }}</strong></div>
+                <div>📚 Total backups stored: <strong>{{ $backupStatus['count'] }}</strong></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+        {{-- Widget 3: Audit Log Summary --}}
+        <div class="lg:col-span-2 bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-blue-800 mb-3">🔒 Audit Log Summary</h3>
+            <p class="text-sm mb-2">Critical events today: <span class="font-bold">{{ $criticalAuditCount }}</span></p>
+            @if(count($latestAudits))
+                <ul class="space-y-2 text-xs text-gray-700">
+                    @foreach($latestAudits as $audit)
+                        <li class="flex justify-between items-center">
+                            <span>
+                                <span class="px-1.5 py-0.5 rounded bg-gray-200 text-gray-800 text-xs">{{ $audit['event'] }}</span>
+                                <span class="ml-1">{{ $audit['auditable_type'] }}</span>
+                                <span class="text-gray-500 ml-1">– {{ $audit['user_name'] }}</span>
+                            </span>
+                            <span class="text-gray-400">{{ $audit['created_at'] }}</span>
+                        </li>
+                    @endforeach
+                </ul>
+            @else
+                <p class="text-xs text-gray-400">No recent audit entries.</p>
+            @endif
+        </div>
+
+        {{-- Widget 4: API Usage Statistics --}}
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-blue-800 mb-3">🌐 API Usage</h3>
+            <div class="text-sm text-gray-700 space-y-2">
+                <div>Today requests: <strong>{{ $apiTodayRequests }}</strong></div>
+                <div>Rate limited (429): <strong>{{ $apiTodayRateLimited }}</strong></div>
+                @if($topEndpoints && $topEndpoints->isNotEmpty())
+                    <div class="mt-3">
+                        <span class="font-medium">Top endpoints</span>
+                        <ul class="list-disc list-inside text-xs text-gray-600 mt-1">
+                            @foreach($topEndpoints as $ep)
+                                <li>{{ $ep->endpoint }} ({{ $ep->total }})</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @else
+                    <p class="text-xs text-gray-400">No API data yet.</p>
+                @endif
+            </div>
+        </div>
+
+        {{-- Widget 5: System Health --}}
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-blue-800 mb-3">⚙️ System Health</h3>
+            <div class="text-sm text-gray-700 space-y-2">
+                <div>Database size: <strong>{{ $dbSize }}</strong></div>
+                <div>Backup storage: <strong>{{ $backupDiskUsage }}</strong></div>
+                <div>Queue length: <strong>{{ $queueLength }}</strong></div>
+                <div>Failed jobs: <strong>{{ $failedJobsCount }}</strong></div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Quick action links (preserved) --}}
+    <div class="flex flex-wrap gap-3 mb-6">
+        <a href="{{ route('admin.books.import-export') }}"
+           class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 transition">
+            📥 Import / Export Books
+        </a>
+        <a href="{{ route('admin.orders.export.index') }}"
+           class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 transition">
+            📦 Order Export
+        </a>
+        <a href="{{ route('admin.users.import-export') }}"
+           class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 transition">
+            👥 User Import/Export
+        </a>
+        <a href="{{ route('admin.backup.index') }}"
+           class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 transition">
+            💾 Backup Management
+        </a>
+        <a href="{{ route('admin.audit.index') }}"
+           class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 transition">
+            📋 Audit Log
+        </a>
+    </div>
+@endif
 
         </div>
     </div>
