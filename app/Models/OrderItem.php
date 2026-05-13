@@ -19,6 +19,10 @@ class OrderItem extends Model implements AuditableContract
         'unit_price'
     ];
 
+    public function getAuditEvents(): array
+    {
+        return [];
+    }
     public function order(){
         return $this->belongsTo(Order::class);
     }

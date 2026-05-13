@@ -17,6 +17,10 @@ class Order extends Model implements AuditableContract
         'status'
     ];
 
+        public function getAuditEvents(): array
+    {
+        return [];
+    }
     // Define order status constants
     const STATUS_PENDING = 'pending';
     const STATUS_PROCESSING = 'processing';

@@ -114,7 +114,8 @@ class BookController extends Controller
                 ->store('book-covers', 'public');
         }
 
-        Book::create($validated);
+        $book = Book::create($validated);
+        \App\Services\AuditService::log('created', \App\Models\Book::class, $book->id, [], $validated, auth()->id());
 
         return redirect()->route('books.index')
             ->with('success', 'Book created successfully.');
@@ -185,7 +186,20 @@ class BookController extends Controller
             $validated['cover_image'] = $path;
         }
 
+            $oldValues = $book->only([
+        'title', 'author', 'isbn', 'price', 'stock_quantity', 'category_id'
+    ]);
+
         $book->update($validated);
+
+    \App\Services\AuditService::log(
+        'updated',
+        \App\Models\Book::class,
+        $book->id,
+        $oldValues,
+        $book->only(['title', 'author', 'isbn', 'price', 'stock_quantity', 'category_id']),
+        auth()->id()
+    );
 
         return redirect()->route('books.index')->with('success', 'Book updated successfully');
     }
@@ -200,7 +214,8 @@ class BookController extends Controller
             Storage::disk('public')->delete($book->cover_image);
         }
 
-        $book->delete();
+        \App\Services\AuditService::log('deleted', \App\Models\Book::class, $book->id, $book->toArray(), [], auth()->id());
+        $book->delete($book->id);
 
         return redirect()->route('books.index')
             ->with('success', 'Book deleted successfully.');

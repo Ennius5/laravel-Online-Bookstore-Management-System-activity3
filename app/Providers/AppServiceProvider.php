@@ -14,6 +14,9 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         //
+        $this->app->singleton(
+        \App\Repositories\BookRepository::class
+    );
     }
 
     /**
@@ -21,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+    \App\Models\Book::observe(\App\Observers\BookObserver::class);
     RateLimiter::for('public', function (Request $request) {
     return Limit::perMinute(30)->by($request->ip());
 });

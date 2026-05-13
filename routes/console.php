@@ -53,4 +53,7 @@ Schedule::command('queue:work --stop-when-empty')
     ->withoutOverlapping();
 
 
-
+// ✅ ADD THIS
+Schedule::command('cache:warm')
+    ->dailyAt('01:00')
+    ->withoutOverlapping();

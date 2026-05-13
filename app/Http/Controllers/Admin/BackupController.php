@@ -70,21 +70,18 @@ public function trigger()
 {
     \Illuminate\Support\Facades\Log::info('Manual backup triggered by user: ' . auth()->user()->name . ' (ID: ' . auth()->id() . ')');
 
-    $output   = [];
-    $exitCode = 0;
-    $artisan  = base_path('artisan'); // ✅ full path to artisan file
+    $artisan = base_path('artisan');
 
-    exec("php \"{$artisan}\" backup:run --only-db 2>&1", $output, $exitCode);
-
-    $outputText = implode("\n", $output);
-    \Illuminate\Support\Facades\Log::info('Backup output: ' . $outputText);
-
-    if ($exitCode === 0) {
-        return redirect()->route('admin.backup.index')
-            ->with('status', 'Backup completed successfully!');
+    // ✅ Run in background — don't wait for it to finish
+    if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+        // Windows: start /B runs process in background
+        pclose(popen("start /B php \"{$artisan}\" backup:run --only-db", "r"));
     } else {
-        return redirect()->route('admin.backup.index')
-            ->with('error', 'Backup failed. Check logs for details.');
+        // Linux/Mac
+        exec("php \"{$artisan}\" backup:run --only-db > /dev/null 2>&1 &");
     }
+
+    return redirect()->route('admin.backup.index')
+        ->with('status', 'Backup started in the background! Check back in a few minutes.');
 }
 }

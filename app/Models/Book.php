@@ -20,11 +20,18 @@ class Book extends Model implements AuditableContract
         'price',
         'stock_quantity',
         'description',
-        'cover_image'
+        'cover_image',
+        'publisher',
+        'format',
+        'is_active',
+        'published_at'
     ];
 
      protected $appends = ['cover_image_url'];
-
+    public function getAuditEvents(): array
+    {
+        return []; // disable automatic auditing
+    }
     public function getCoverImageUrlAttribute()
     {
         if (!$this->cover_image) {

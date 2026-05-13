@@ -92,7 +92,14 @@ public function index(Request $request)
             ['user_id' => $userId, 'status' => 'pending'],
             ['total_amount' => 0] // default total_amount, will be updated later
         );
-
+        \App\Services\AuditService::log(
+    'created',
+    \App\Models\Order::class,
+    $order->id,
+    [],
+    ['user_id' => $order->user_id, 'total_amount' => $order->total_amount, 'status' => $order->status],
+    auth()->id()
+)
         //check if no stock left first before adding to cart
         if ($book->stock_quantity < $quantity) {
             throw new \Exception("Insufficient stock for {$book->title}. Available: {$book->stock_quantity}");
