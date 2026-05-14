@@ -80,7 +80,14 @@ public function trigger()
         // Linux/Mac
         exec("php \"{$artisan}\" backup:run --only-db > /dev/null 2>&1 &");
     }
-
+\App\Services\AuditService::log(
+    'backup_triggered',
+    \App\Models\User::class,
+    auth()->id(),
+    [],
+    ['triggered_by' => auth()->user()->name, 'type' => 'manual'],
+    auth()->id()
+);
     return redirect()->route('admin.backup.index')
         ->with('status', 'Backup started in the background! Check back in a few minutes.');
 }

@@ -28,6 +28,14 @@ class ReviewController extends Controller
 
         if ($existingReview) {
             $existingReview->update($validated);
+            \App\Services\AuditService::log(
+    'updated',
+    \App\Models\Review::class,
+    $existingReview->id,
+    ['rating' => $existingReview->getOriginal('rating')],
+    ['rating' => $existingReview->rating],
+    auth()->id()
+);
             $message = 'Review updated successfully!';
             try {
                 Mail::to(auth()->user()->email)->send(new ReviewNotification($existingReview, 'customer'));
@@ -36,6 +44,14 @@ class ReviewController extends Controller
             }
         } else {
             $review = Review::create($validated);
+            \App\Services\AuditService::log(
+    'created',
+    \App\Models\Review::class,
+    $review->id,
+    [],
+    ['book_id' => $review->book_id, 'rating' => $review->rating],
+    auth()->id()
+);
             $message = 'Review submitted successfully!';
                         try {
                 Mail::to(auth()->user()->email)->send(new ReviewConfirmation($review));
@@ -80,6 +96,14 @@ class ReviewController extends Controller
             abort(403);
         }
         $book = Book::findOrFail($review->book_id);
+        \App\Services\AuditService::log(
+    'deleted',
+    \App\Models\Review::class,
+    $review->id,
+    ['book_id' => $review->book_id, 'rating' => $review->rating, 'user_id' => $review->user_id],
+    [],
+    auth()->id()
+);
         $review->delete();
 
         return redirect()->route('books.show', $book)

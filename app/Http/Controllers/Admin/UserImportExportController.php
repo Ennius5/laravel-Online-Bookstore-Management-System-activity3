@@ -26,7 +26,14 @@ class UserImportExportController extends Controller
         ]);
 
         Excel::import(new UsersImport(), $request->file('file'));
-
+\App\Services\AuditService::log(
+    'users_imported',
+    \App\Models\User::class,
+    null,
+    [],
+    ['filename' => $request->file('file')->getClientOriginalName()],
+    auth()->id()
+);
         return back()->with('success', 'User import started in the background!');
     }
 
@@ -34,7 +41,16 @@ class UserImportExportController extends Controller
     {
         $redactPII = $request->boolean('redact_pii');
         $filename  = 'users_export_' . now()->format('Y-m-d_His') . '.xlsx';
+\App\Services\AuditService::log(
+    'users_exported',
+    \App\Models\User::class,
+    null,
+    [],
+    ['redact_pii' => $redactPII],
+    auth()->id()
+);
 
+return Excel::download(new UsersExport($redactPII), $filename);
         return Excel::download(new UsersExport($redactPII), $filename);
     }
 }

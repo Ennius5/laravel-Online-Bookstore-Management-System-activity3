@@ -178,6 +178,14 @@ class TwoFactorController extends Controller
             // Log user back in if needed
             if (!Auth::check()) {
                 Auth::login($user);
+                \App\Services\AuditService::log(
+    '2fa_verified',
+    \App\Models\User::class,
+    $user->id,
+    [],
+    [],
+    $user->id
+);
             }
 
             // Fetch fresh user data to confirm
@@ -197,6 +205,14 @@ class TwoFactorController extends Controller
         $user->save();
 
         Auth::login($user);
+        \App\Services\AuditService::log(
+    '2fa_verified',
+    \App\Models\User::class,
+    $user->id,
+    [],
+    [],
+    $user->id
+);
         session()->forget('two_factor:user:id');
 
         return redirect()->intended('dashboard')
@@ -231,6 +247,14 @@ class TwoFactorController extends Controller
 
         // Send email
         Mail::to($user)->send(new TwoFactorCode($code));
+        \App\Services\AuditService::log(
+    '2fa_code_resent',
+    \App\Models\User::class,
+    $user->id,
+    [],
+    [],
+    $user->id
+);
 
         return redirect()->route('two-factor.challenge')
             ->with('status', 'New code sent to your email.');

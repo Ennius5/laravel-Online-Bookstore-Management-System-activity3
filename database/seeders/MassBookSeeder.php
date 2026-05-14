@@ -51,8 +51,6 @@ class MassBookSeeder extends Seeder
         $elapsed = round(microtime(true) - $startTime, 1);
         $this->command->info("\n✅ Done! {$inserted} books seeded in {$elapsed} seconds.");
 
-        $this->call([
-        MassBookSeeder::class,
-        ]);
+
     }
 }

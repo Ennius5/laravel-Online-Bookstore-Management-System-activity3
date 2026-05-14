@@ -71,7 +71,14 @@ class CategoryController extends Controller
         ]);
 
         $category = Category::create($request->all());
-
+\App\Services\AuditService::log(
+    'created',
+    \App\Models\Category::class,
+    $category->id,
+    [],
+    ['name' => $category->name, 'description' => $category->description],
+    auth()->id()
+);
         return response()->json([
             'success' => true,
             'message' => 'Category created successfully',
@@ -105,9 +112,16 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
             'description' => 'nullable|string'
         ]);
-
+$oldValues = $category->only(['name', 'description']);
         $category->update($request->all());
-
+\App\Services\AuditService::log(
+    'updated',
+    \App\Models\Category::class,
+    $category->id,
+    $oldValues,
+    $category->only(['name', 'description']),
+    auth()->id()
+);
         return response()->json([
             'success' => true,
             'message' => 'Category updated successfully',
@@ -128,7 +142,14 @@ class CategoryController extends Controller
                 'message' => 'Cannot delete category with associated books'
             ], 400);
         }
-
+\App\Services\AuditService::log(
+    'deleted',
+    \App\Models\Category::class,
+    $category->id,
+    ['name' => $category->name, 'description' => $category->description],
+    [],
+    auth()->id()
+);
         $category->delete();
 
         return response()->json([

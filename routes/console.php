@@ -57,3 +57,7 @@ Schedule::command('queue:work --stop-when-empty')
 Schedule::command('cache:warm')
     ->dailyAt('01:00')
     ->withoutOverlapping();
+
+Schedule::command('app:refresh-materialized-views')
+    ->hourly()
+    ->withoutOverlapping();

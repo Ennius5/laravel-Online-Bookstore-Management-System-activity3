@@ -52,6 +52,15 @@ public function import(Request $request)
         $request->file('file')
     );
 
+    \App\Services\AuditService::log(
+    'books_imported',
+    \App\Models\ImportLog::class,
+    $log->id,
+    [],
+    ['filename' => $log->filename, 'duplicate_handling' => $request->duplicate_handling],
+    auth()->id()
+);
+
     return back()->with('success', 'Import queued! Check the log below for progress.');
 }
 
@@ -74,7 +83,14 @@ public function export(Request $request)
         'filters' => $filters,
         'status'  => 'Completed',
     ]);
-
+\App\Services\AuditService::log(
+    'books_exported',
+    \App\Models\ExportLog::class,
+    $log->id,
+    [],
+    ['format' => $log->format, 'filters' => $filters],
+    auth()->id()
+);
     $filename = 'books_export_' . now()->format('Y-m-d_His') . '.' . $log->format;
 
     return Excel::download(

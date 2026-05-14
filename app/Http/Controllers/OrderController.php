@@ -92,14 +92,15 @@ public function index(Request $request)
             ['user_id' => $userId, 'status' => 'pending'],
             ['total_amount' => 0] // default total_amount, will be updated later
         );
-        \App\Services\AuditService::log(
+
+\App\Services\AuditService::log(
     'created',
     \App\Models\Order::class,
     $order->id,
     [],
     ['user_id' => $order->user_id, 'total_amount' => $order->total_amount, 'status' => $order->status],
     auth()->id()
-)
+);
         //check if no stock left first before adding to cart
         if ($book->stock_quantity < $quantity) {
             throw new \Exception("Insufficient stock for {$book->title}. Available: {$book->stock_quantity}");
@@ -148,7 +149,14 @@ public function index(Request $request)
         try {
             // Update order status
             $order->update(['status' => 'processing']);
-
+\App\Services\AuditService::log(
+    'order_status_updated',
+    \App\Models\Order::class,
+    $order->id,
+    ['status' => 'pending'],
+    ['status' => 'processing'],
+    auth()->id()
+);
             DB::commit();
         // Send status update email to customer
         Mail::to($order->user->email)->send(new NewOrderNotification($order, 'customer'));
@@ -397,7 +405,14 @@ public function index(Request $request)
                     $item->book->increment('stock_quantity', $item->quantity);
                 }
             }
-
+\App\Services\AuditService::log(
+    'order_deleted',
+    \App\Models\Order::class,
+    $order->id,
+    ['total_amount' => $order->total_amount, 'status' => $order->status, 'user_id' => $order->user_id],
+    [],
+    auth()->id()
+);
             // Delete order items first
             $order->orderItems()->delete();
 
@@ -464,7 +479,14 @@ public function index(Request $request)
             }
             Log::info("Updating the order with status $newStatus");
             $order->update(['status' => $newStatus]);
-
+\App\Services\AuditService::log(
+    'order_status_updated',
+    \App\Models\Order::class,
+    $order->id,
+    ['status' => $oldStatus],
+    ['status' => $newStatus],
+    auth()->id()
+);
             DB::commit();
 
             Mail::to($order->user->email)->send(new OrderStatusUpdate($order, $oldStatus));
@@ -519,7 +541,14 @@ public function index(Request $request)
             }
 
             $order->update(['status' => 'cancelled']);
-
+\App\Services\AuditService::log(
+    'order_cancelled',
+    \App\Models\Order::class,
+    $order->id,
+    ['status' => 'processing'],
+    ['status' => 'cancelled'],
+    auth()->id()
+);
             DB::commit();
 
             return redirect()->route('orders.show', $order)

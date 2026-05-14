@@ -37,9 +37,16 @@ class ProfileController extends Controller
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
         }
-
+$oldValues = $request->user()->only(['name', 'email']);
         $request->user()->save();
-
+\App\Services\AuditService::log(
+    'profile_updated',
+    \App\Models\User::class,
+    auth()->id(),
+    $oldValues,
+    $request->user()->only(['name', 'email']),
+    auth()->id()
+);
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
@@ -54,6 +61,14 @@ class ProfileController extends Controller
 
         $user = $request->user();
         // \App\Services\AuditService::log('logout', 'App\Models\User', $user->id);
+        \App\Services\AuditService::log(
+    'profile_updated',
+    \App\Models\User::class,
+    auth()->id(),
+    $oldValues,
+    $request->user()->only(['name', 'email']),
+    auth()->id()
+);
         Auth::logout();
 
         $user->delete();
